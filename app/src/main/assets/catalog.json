@@ -661,12 +661,12 @@
   "posm_categories": [
     {
       "key": "fabric",
-      "subtitle": "18 materials",
+      "subtitle": "9 materials",
       "class_ids": [
         34
       ],
       "display": {
-        "34": "DUMMY SURF EXCEL SHOPFIN SEP26"
+        "34": "SURF EXCEL SHOPFIN SEP26"
       },
       "missing_from_model": [
         "surf_excel_expert_hanger_26",
@@ -682,7 +682,7 @@
     },
     {
       "key": "hair_care",
-      "subtitle": "28 materials",
+      "subtitle": "14 materials",
       "class_ids": [
         30,
         31,
@@ -690,10 +690,10 @@
         33
       ],
       "display": {
-        "30": "DUMMY SUNSILK RELAUNCH BLACK 5PLUS1 FESTOON PHASE1 AUG26",
-        "31": "DUMMY SUNSILK RELAUNCH BLACK 5PLUS1 BUNTING PHASE1 AUG26",
-        "32": "DUMMY SUNSILK RELAUNCH BLACK 5PLUS1 POSTER PHASE1 AUG26",
-        "33": "DUMMY SUNSILK RELAUNCH SMOOTH BUNTING PHASE1 AUG26"
+        "30": "SUNSILK RELAUNCH BLACK 5PLUS1 FESTOON",
+        "31": "SUNSILK RELAUNCH BLACK 5PLUS1 BUNTING PHASE1 AUG26",
+        "32": "SUNSILK RELAUNCH BLACK 5PLUS1 POSTER PHASE1 AUG26",
+        "33": "SUNSILK RELAUNCH SMOOTH BUNTING PHASE1 AUG26"
       },
       "missing_from_model": [
         "clear_men_csm_bunting_jul26",
@@ -710,7 +710,7 @@
     },
     {
       "key": "home_and_hygiene",
-      "subtitle": "24 materials",
+      "subtitle": "12 materials",
       "class_ids": [
         38,
         39,
@@ -724,23 +724,23 @@
         47
       ],
       "display": {
-        "38": "DUMMY VIM RELAUNCH BUNTING AUG26",
-        "39": "DUMMY VIM RELAUNCH POSTER AUG26",
-        "40": "DUMMY VIM RELAUNCH PRICEBOARD AUG26",
-        "41": "DUMMY VIM RELAUNCH SHELF STRIP AUG26",
-        "42": "DUMMY VIM RELAUNCH SHELF TALKER AUG26",
-        "43": "DUMMY VIM RELAUNCH SHELF TALKER AUG26",
-        "44": "DUMMY VIM RELAUNCH SHELF TALKER AUG26",
-        "45": "DUMMY VIM RELAUNCH SHELF TALKER AUG26",
-        "46": "DUMMY VIM RELAUNCH SHUTTER PILLAR STICKER AUG26",
-        "47": "DUMMY VIM RELAUNCH SUNSHADE BANNER AUG26"
+        "38": "VIM RELAUNCH BUNTING",
+        "39": "VIM RELAUNCH POSTER",
+        "40": "VIM RELAUNCH PRICEBOARD AUG26",
+        "41": "VIM RELAUNCH SHELF STRIP",
+        "42": "VIM RELAUNCH SHELF TALKER AUG26",
+        "43": "VIM RELAUNCH SHELF TALKER AUG26",
+        "44": "VIM RELAUNCH SHELF TALKER AUG26",
+        "45": "VIM RELAUNCH SHELF TALKER AUG26",
+        "46": "VIM RELAUNCH SHUTTER PILLAR STICKER",
+        "47": "VIM RELAUNCH SUNSHADE BANNER"
       },
       "missing_from_model": [],
       "unmapped_model_classes": []
     },
     {
       "key": "mini_meals",
-      "subtitle": "2 materials",
+      "subtitle": "1 material",
       "class_ids": [],
       "display": {},
       "missing_from_model": [
@@ -750,7 +750,7 @@
     },
     {
       "key": "nutrition",
-      "subtitle": "54 materials",
+      "subtitle": "27 materials",
       "class_ids": [
         0,
         5,
@@ -763,15 +763,15 @@
         12
       ],
       "display": {
-        "0": "CHOCOLATE HORLICKS RELAUNCH POSTER AUG26",
-        "5": "DUMMY HORLICKS 10TK SACHET HANGER NOV26",
-        "6": "DUMMY HORLICKS 10TK SHUTTER PILLAR STICKER NOV26",
-        "7": "DUMMY HORLICKS 10TK SUNSHADE BANNER NOV26",
-        "8": "DUMMY HORLICKS BUNTING OCT26",
-        "9": "DUMMY HORLICKS PRICE BOARD OCT26",
-        "10": "DUMMY HORLICKS LARGE POSTER SEP26",
-        "11": "DUMMY HORLICKS SHOPFIN AUG26",
-        "12": "DUMMY HORLICKS 10TK SHUTTER PILLAR STICKER NOV26"
+        "0": "CHOCOLATE HORLICKS RELAUNCH POSTER",
+        "5": "HORLICKS 10TK SACHET HANGER",
+        "6": "HORLICKS",
+        "7": "HORLICKS 10TK SUNSHADE BANNER",
+        "8": "HORLICKS BUNTING OCT26",
+        "9": "HORLICKS PRICE BOARD OCT26",
+        "10": "HORLICKS",
+        "11": "HORLICKS SHOPFIN AUG26",
+        "12": "HORLICKS"
       },
       "missing_from_model": [
         "glucomax_lemon_sunshade_banner_jun26",
@@ -783,7 +783,7 @@
     },
     {
       "key": "oral_care",
-      "subtitle": "28 materials",
+      "subtitle": "14 materials",
       "class_ids": [
         21,
         22,
@@ -796,15 +796,15 @@
         29
       ],
       "display": {
-        "21": "DUMMY ORAL CARE TOOTHPASTE SHELF TALKER OCT26",
-        "22": "DUMMY ORAL CARE TOOTHPASTE SHELF TALKER OCT26",
-        "23": "DUMMY ORAL CARE TOOTHPASTE SHELF TALKER OCT26",
-        "24": "DUMMY ORAL CARE TOOTHPASTE SHELF TALKER OCT26",
-        "25": "DUMMY PEPSODENT GUM EXPERT POSTER OCT26",
-        "26": "DUMMY PEPSODENT RELAUNCH LARGE HANGER OCT26",
-        "27": "DUMMY PEPSODENT RELAUNCH POSTER OCT26",
-        "28": "DUMMY PEPSODENT RELAUNCH SMALL HANGER OCT26",
-        "29": "DUMMY PEPSODENT RELAUNCH STICKER OCT26"
+        "21": "ORAL CARE TOOTHPASTE SHELF TALKER OCT26",
+        "22": "ORAL CARE TOOTHPASTE SHELF TALKER OCT26",
+        "23": "ORAL CARE TOOTHPASTE SHELF TALKER OCT26",
+        "24": "ORAL CARE TOOTHPASTE SHELF TALKER OCT26",
+        "25": "PEPSODENT GUM EXPERT POSTER OCT26",
+        "26": "PEPSODENT RELAUNCH LARGE HANGER",
+        "27": "PEPSODENT RELAUNCH POSTER",
+        "28": "PEPSODENT RELAUNCH SMALL HANGER",
+        "29": "PEPSODENT RELAUNCH STICKER"
       },
       "missing_from_model": [
         "closeup_lemon_salt_poster_jun26",
@@ -819,16 +819,16 @@
     },
     {
       "key": "skin_care",
-      "subtitle": "42 materials",
+      "subtitle": "21 materials",
       "class_ids": [
         35,
         36,
         37
       ],
       "display": {
-        "35": "DUMMY VASELINE GLUTA 70ML COUNTER TOP OCT26",
-        "36": "DUMMY VASELINE GLUTA 70ML POSTER OCT26",
-        "37": "DUMMY VASELINE GLUTA 70ML SMALL STICKER OCT26"
+        "35": "VASELINE GLUTA 70ML COUNTER TOP",
+        "36": "VASELINE GLUTA 70ML POSTER",
+        "37": "VASELINE GLUTA 70ML SMALL STICKER"
       },
       "missing_from_model": [
         "gal_relaunch_bunting_jan26",
@@ -855,7 +855,7 @@
     },
     {
       "key": "skin_cleansing",
-      "subtitle": "42 materials",
+      "subtitle": "21 materials",
       "class_ids": [
         1,
         2,
@@ -875,14 +875,14 @@
         "2": "DOVE & LUX INT QPDS SHELF TALKER SEP26",
         "3": "DOVE & LUX INT QPDS SHELF TALKER SEP26",
         "4": "DOVE & LUX INT QPDS SHELF TALKER SEP26",
-        "13": "DUMMY LIFEBUOY RELAUNCH BUNTING OCT26",
-        "14": "DUMMY LIFEBUOY RELAUNCH DANGLER OCT26",
-        "15": "DUMMY LIFEBUOY RELAUNCH POSTER OCT26",
-        "16": "DUMMY LUX BUNTING PHASE1 AUG26",
-        "17": "DUMMY LUX MODEL POSTER PHASE1 AUG26",
-        "18": "DUMMY LUX PRODUCT POSTER PHASE1 AUG26",
-        "19": "DUMMY LUX SHELF STRIP PHASE1 AUG26",
-        "20": "DUMMY LUX SHOPFIN PHASE1 AUG26"
+        "13": "LIFEBUOY RELAUNCH BUNTING",
+        "14": "LIFEBUOY RELAUNCH DANGLER",
+        "15": "LIFEBUOY RELAUNCH POSTER",
+        "16": "LUX BUNTING",
+        "17": "LUX MODEL POSTER",
+        "18": "LUX PRODUCT POSTER",
+        "19": "LUX SHELF STRIP",
+        "20": "LUX SHOPFIN"
       },
       "missing_from_model": [
         "lux_bodywash",

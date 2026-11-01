@@ -119,6 +119,20 @@ def _posm_categories(posm_yaml: Path, posm_names: Path) -> list[dict]:
     for posm_name, spec in sorted(items.items()):
         if not isinstance(spec, dict):
             continue
+        # Skip DUMMY entries, exactly as the server does
+        # (utils/posm_compliance.py:184, which also counts only non-DUMMY
+        # names as active).
+        #
+        # Half the real file is these: 119 of 238 entries are a "DUMMY "
+        # prefixed duplicate of a real entry, carrying the same ai_class.
+        # Keeping them cost nothing in the allowlist, since every class is
+        # reachable through a real name too, but it decided labels: picking
+        # the alphabetically first name among those sharing a class handed
+        # the placeholder the label whenever the real name sorted after D,
+        # which is how a Sunsilk poster came to read "DUMMY SUNSILK RELAUNCH
+        # BLACK 5PLUS1 POSTER PHASE1 AUG26" on screen.
+        if posm_name.upper().startswith("DUMMY "):
+            continue
         ai_class, category = spec.get("ai_class"), spec.get("category")
         if not ai_class or not category:
             continue

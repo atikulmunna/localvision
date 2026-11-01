@@ -18,6 +18,27 @@ item_mappings:
     ai_class: aloe_poster_festoon
     category: skin_care
 
+  # Half the real file (119 of 238 entries) is DUMMY-prefixed duplicates of
+  # real entries, carrying the same ai_class. The server skips them outright
+  # (utils/posm_compliance.py:184). They must not become labels, and must not
+  # be counted as materials.
+  DUMMY Aloe Poster Festoon:
+    ai_class: aloe_poster_festoon
+    category: skin_care
+  DUMMY Closeup LS Poster:
+    ai_class: closeup_ls_poster
+    category: oral_care
+
+  # The exact shape of the bug seen on the device: the real name sorts AFTER
+  # "DUMMY", so alphabetical selection picked the placeholder. A pair whose
+  # real name sorts before D would not reproduce it.
+  Sunsilk Relaunch Black Poster:
+    ai_class: sunsilk_relaunch_black_poster
+    category: hair_care
+  DUMMY Sunsilk Relaunch Black Poster:
+    ai_class: sunsilk_relaunch_black_poster
+    category: hair_care
+
   # One standard, several model classes. A shelf talker is detected piece by
   # piece (top, left, right, bottom), so 34 of the real file's 238 entries
   # carry a list here rather than a single name.

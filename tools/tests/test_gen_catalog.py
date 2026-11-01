@@ -52,6 +52,37 @@ def test_posm_standard_mapping_to_several_classes_contributes_all_of_them():
     assert skin["display"]["41"] == "PS GAL Rolling Sticker Feb26"
 
 
+def test_dummy_entries_never_supply_the_label():
+    """Half the real standards file is DUMMY-prefixed duplicates.
+
+    The user caught this on the device: a Sunsilk poster was labelled
+    "DUMMY SUNSILK RELAUNCH BLACK 5PLUS1 POSTER PHASE1 AUG26" because the
+    DUMMY twin carries the same ai_class and 'D' sorts before 'S'. The server
+    skips these entries outright (utils/posm_compliance.py:184), so the
+    catalog does too.
+    """
+    cat = build_catalog(QPDS_MIN, POSM_MIN, NAMES_MIN, None)
+    for entry in cat["posm_categories"]:
+        for label in entry["display"].values():
+            assert not label.upper().startswith("DUMMY "), label
+
+
+def test_dummy_entries_do_not_count_as_materials():
+    # The subtitle counts what a person could actually find on a shelf.
+    cat = build_catalog(QPDS_MIN, POSM_MIN, NAMES_MIN, None)
+    skin = next(c for c in cat["posm_categories"] if c["key"] == "skin_care")
+    assert skin["subtitle"] == "2 materials"
+
+
+def test_dummy_duplicate_does_not_remove_its_real_twins_class():
+    # Skipping DUMMY entries must not cost a detection: every class in the
+    # real file is reachable through a non-DUMMY name as well.
+    cat = build_catalog(QPDS_MIN, POSM_MIN, NAMES_MIN, None)
+    skin = next(c for c in cat["posm_categories"] if c["key"] == "skin_care")
+    assert 20 in skin["class_ids"]
+    assert skin["display"]["20"] == "Aloe Poster Festoon"
+
+
 def test_qpds_slab_resolves_display_names_to_ai_class():
     # shelf_types lists display names; product_mappings maps ai_class -> display name
     cat = build_catalog(QPDS_MIN, POSM_MIN, NAMES_MIN, QPDS_CLS_NAMES_MIN)
