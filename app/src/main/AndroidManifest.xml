@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!--
+      CAMERA is the only permission this app is meant to hold.
+
+      No network permission is declared, so the app is offline by construction
+      rather than by promise: the platform refuses network access outright and
+      no amount of later code can send a shelf photo anywhere.
+
+      Do not verify that by grepping this file. This comment names the
+      permissions, and so would any explanation of their absence. The merged
+      manifest is the only honest source, because libraries contribute
+      permissions too (see below): read the permission list out of
+      app/build/intermediates/merged_manifest/debug/, or read the merger's own
+      blame report under app/build/outputs/logs/, which says who asked for what.
+    -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera.any" android:required="true" />
+
+    <!--
+      Removals, not declarations.
+
+      com.google.ai.edge.litert:litert-gpu-api:1.4.0 ships a manifest with no
+      targetSdkVersion. The merger reads that as targetSdkVersion below 4 and
+      legacy-implies storage and phone-state permissions on its behalf, which
+      landed READ_PHONE_STATE, READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE
+      in the merged manifest of an app that asks for none of them. A shelf
+      audit tool reading phone state is indefensible, so they are removed here.
+
+      If the GPU delegate ever stops resolving at runtime, suspect these.
+    -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:node="remove" />
+
+    <application
+        android:allowBackup="false"
+        android:label="UBL Detect Viewer"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.UblDetect">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
