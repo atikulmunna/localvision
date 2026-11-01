@@ -66,17 +66,17 @@ class LetterboxTest {
 
     @Test
     fun reproducesTheMeasuredContractBox() {
-        // The real check. docs/model-contract.md records one exported-model row
-        // on a 1919x1080 photo at 640: raw (261.764, 245.272, 641.963, 294.087)
-        // un-letterboxes to roughly (784.9, 315.7, 1924.9, 462.0), which agreed
-        // with the .pt reference to 1 or 2 pixels. If this drifts, the decoder's
-        // boxes drift with it.
+        // The real check. docs/model-contract.md records the exported model's
+        // top row on a 1919x1080 photo at 640, as the app and cv2 both produce
+        // it: raw (28.76, 221.98, 370.47, 291.46). Un-letterboxed that is
+        // about (86.2, 246.1, 1110.8, 454.4) in the source frame. If this
+        // drifts, every drawn box drifts with it.
         val t = Letterbox.compute(1919, 1080, 640)
-        val r = Letterbox.rectToSource(RectF(261.764f, 245.272f, 641.963f, 294.087f), t)
-        assertEquals(784.9f, r.left, 0.5f)
-        assertEquals(315.7f, r.top, 0.5f)
-        assertEquals(1924.9f, r.right, 0.5f)
-        assertEquals(462.0f, r.bottom, 0.5f)
+        val r = Letterbox.rectToSource(RectF(28.761932f, 221.97615f, 370.47034f, 291.4572f), t)
+        assertEquals(86.2f, r.left, 0.5f)
+        assertEquals(246.1f, r.top, 0.5f)
+        assertEquals(1110.8f, r.right, 0.5f)
+        assertEquals(454.4f, r.bottom, 0.5f)
     }
 
     @Test

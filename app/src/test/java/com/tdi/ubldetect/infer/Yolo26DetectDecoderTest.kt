@@ -111,20 +111,19 @@ class Yolo26DetectDecoderTest {
 
     @Test
     fun reproducesTheMeasuredContractDetection() {
-        // docs/model-contract.md, row 1 from the real exported model on a real
-        // photo: raw (261.764, 245.272, 641.963, 294.087) score 0.468 class 16,
-        // which un-letterboxes to about (784.9, 315.7) and agreed with the .pt
-        // reference to 1 or 2 pixels.
+        // docs/model-contract.md, the exported model's top row on a real photo
+        // as both the app and cv2 produce it: raw (28.76, 221.98, 370.47,
+        // 291.46) score 0.559 class 13, un-letterboxing to about (86.2, 246.1).
         val tt = Letterbox.compute(1919, 1080, 640)
         val out = Yolo26DetectDecoder.decode(
-            rows(floatArrayOf(261.764f, 245.272f, 641.963f, 294.087f, 0.468f, 16f)),
+            rows(floatArrayOf(28.761932f, 221.97615f, 370.47034f, 291.4572f, 0.5594f, 13f)),
             shape, 0.30f, null, tt,
         )
         assertEquals(1, out.size)
-        assertEquals(16, out[0].classId)
-        assertEquals(0.468f, out[0].score, 1e-4f)
-        assertEquals(784.9f, out[0].box.left, 0.5f)
-        assertEquals(315.7f, out[0].box.top, 0.5f)
+        assertEquals(13, out[0].classId)
+        assertEquals(0.5594f, out[0].score, 1e-4f)
+        assertEquals(86.2f, out[0].box.left, 0.5f)
+        assertEquals(246.1f, out[0].box.top, 0.5f)
     }
 
     @Test

@@ -71,30 +71,48 @@ Three properties the decoder relies on, all measured:
    a score above 0.01, so the decoder can stop at the first row below threshold
    instead of walking all 300.
 
-### Verification against the .pt reference
+### Verification, and the resampling that decides it
 
 One real POSM photo (1919x1080,
 `CLEAR_MEN_CSM_5ML_BUNTING_JUL26_1_20261025_173711_350d5e03.jpg`) at 640,
-threshold 0.30. Rows un-letterboxed into source pixels against
-`YOLO(POSM_YOLO11X.pt).predict(imgsz=640, conf=0.30)`:
+threshold 0.30.
 
-| | tflite (w8a32) | .pt reference |
-|---|---|---|
-| 1 | cls 16, 0.468, (784.9, 315.7, 1924.9, 462.0) | cls 16, 0.574, (785.9, 313.7, 1914.4, 461.8) |
-| 2 | cls **13**, 0.333, (71.1, 244.1, 780.9, 435.6) | cls **16**, 0.350, (71.2, 243.0, 783.1, 436.1) |
+**Downscale resampling changes the answer, so it is part of the contract.**
+Fitting a 1919 pixel frame into 640 is a 3x reduction. PIL's `resize` filters
+as it downscales; `cv2.INTER_LINEAR` does not, and Ultralytics uses cv2. The
+two preprocessings disagree about what the top detection even is:
 
-Boxes agree to 1 or 2 pixels, which confirms the coordinate space.
+| Preprocessing | Top row |
+|---|---|
+| PIL BILINEAR (filtered) | cls 16 @ 0.468, (261.8, 245.3, 642.0, 294.1) |
+| cv2 INTER_LINEAR (unfiltered) | cls 13 @ 0.489, (28.7, 222.2, 369.3, 291.9) |
+| **The app, on device** | **cls 13 @ 0.559, (28.8, 222.0, 370.5, 291.5)** |
 
-Two differences are real and expected, and both belong in Task 16's analysis
-rather than being treated as bugs now:
+The app matches cv2 to about a pixel on the boxes and to the class, which is
+the agreement that matters: cv2 is what the reference pipeline does. An
+earlier version of this document quoted the PIL numbers, which made the app
+look wrong when it was the measurement that was unrepresentative.
 
-- **Scores sit lower under w8a32** (0.468 against 0.574). A fixed threshold
-  therefore keeps fewer detections on device than on the server.
-- **A marginal detection changed class**: 13 against 16 on the 0.33 box, while
-  the box itself was identical. Dynamic int8 can flip a class where two
-  classes are close. This is the signature of quantization drift, not of a
-  preprocessing bug, and the two are distinguishable precisely because the
-  box agreed.
+So `InputTensor` resamples with plain bilinear and no antialiasing, on
+purpose. It would be an easy and wrong "improvement" to add filtering here.
+
+### Why not compare against `YOLO(...).predict()`
+
+Running the `.pt` through Ultralytics on this image returns class 16 twice,
+which looks like a third disagreement and is not a fair comparison. YOLO26
+carries two heads. `predict()` uses the one2many head and runs NMS over it;
+our export with `nms=False` ships the one2one NMS-free head. They are
+different heads of the same network and are entitled to disagree on marginal
+detections.
+
+The honest reference for the app is therefore **the same exported `.tflite`,
+run in Python with cv2 preprocessing**. That is the row the table above
+compares against, and the app reproduces it.
+
+Scores still sit a little higher on device than in the Python run of the same
+file (0.559 against 0.489). Same class, same box, so this is arithmetic order
+and the delegate, not preprocessing. Task 16 is where that gets characterised
+properly.
 
 ### File sizes
 

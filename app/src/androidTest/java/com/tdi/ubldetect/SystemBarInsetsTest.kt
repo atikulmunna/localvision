@@ -1,6 +1,7 @@
 package com.tdi.ubldetect
 
 import android.view.View
+import com.tdi.ubldetect.ui.PickerActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.test.core.app.ActivityScenario
@@ -27,7 +28,7 @@ class SystemBarInsetsTest {
 
     @Test
     fun contentIsInsetBelowTheStatusBar() {
-        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+        ActivityScenario.launch(PickerActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
                 val content = activity.findViewById<View>(android.R.id.content)
                 val root = (content as android.view.ViewGroup).getChildAt(0)
@@ -47,7 +48,7 @@ class SystemBarInsetsTest {
 
     @Test
     fun contentIsInsetAboveTheNavigationBar() {
-        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+        ActivityScenario.launch(PickerActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
                 val content = activity.findViewById<View>(android.R.id.content)
                 val root = (content as android.view.ViewGroup).getChildAt(0)

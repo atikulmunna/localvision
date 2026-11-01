@@ -42,7 +42,7 @@
         android:theme="@style/Theme.UblDetect">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.PickerActivity"
             android:exported="true"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -50,6 +50,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".ui.CameraActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

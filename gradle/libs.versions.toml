@@ -15,6 +15,7 @@ litert = "1.4.0"
 litertGpu = "1.4.0"
 kotlinxSerialization = "1.8.0"
 coreKtx = "1.15.0"
+activity = "1.9.3"
 androidxTestCore = "1.6.1"
 junit = "4.13.2"
 androidxTestJunit = "1.2.1"
@@ -35,6 +36,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 
 # WindowInsetsCompat: the app targets SDK 36 and so lays out edge to edge.
 core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
+activity = { module = "androidx.activity:activity", version.ref = "activity" }
 
 junit = { module = "junit:junit", version.ref = "junit" }
 androidx-test-junit = { module = "androidx.test.ext:junit", version.ref = "androidxTestJunit" }

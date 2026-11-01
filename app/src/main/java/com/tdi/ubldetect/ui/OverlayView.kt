@@ -102,13 +102,18 @@ class OverlayView @JvmOverloads constructor(
             canvas.drawText(text, r.left + 8f, baseline, labelPaint)
         }
 
+        // Padding does not move the canvas, it only reserves space, so the
+        // status line has to honour it explicitly. Without this it draws at
+        // y=0 and sits on top of the system clock, which is exactly the
+        // overlap this app already had once.
+        val top = paddingTop.toFloat()
         if (status.isNotEmpty()) {
-            canvas.drawRect(0f, 0f, width.toFloat(), 44f, statusBackPaint)
-            canvas.drawText(status, 16f, 32f, statusPaint)
+            canvas.drawRect(0f, top, width.toFloat(), top + 44f, statusBackPaint)
+            canvas.drawText(status, paddingLeft + 16f, top + 32f, statusPaint)
         }
 
         if (state.frozen) {
-            canvas.drawText("FROZEN", width - 140f, 32f, statusPaint)
+            canvas.drawText("FROZEN", width - paddingRight - 140f, top + 32f, statusPaint)
         }
     }
 }
