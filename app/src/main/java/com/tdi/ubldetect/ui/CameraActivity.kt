@@ -193,11 +193,11 @@ class CameraActivity : ComponentActivity() {
             return
         }
 
-        val source = FrameSource(this, this, previewView) { frame, timestampNs ->
+        val source = FrameSource(this, this, previewView) { frame, timestampNs, convertMs ->
             // Threshold is read per frame, so the slider takes effect on the
             // next frame without touching the interpreter.
             val s = state
-            val result = pipeline?.process(frame, timestampNs, s.useAllowlist)
+            val result = pipeline?.process(frame, timestampNs, s.useAllowlist, mapOf("yuv" to convertMs))
             lastFrame = frame
             lastResult = result
             runOnUiThread {

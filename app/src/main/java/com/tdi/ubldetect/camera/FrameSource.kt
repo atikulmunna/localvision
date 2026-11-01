@@ -2,10 +2,14 @@ package com.tdi.ubldetect.camera
 
 import android.content.Context
 import android.util.Log
+import android.util.Size
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
+import androidx.camera.core.resolutionselector.AspectRatioStrategy
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
@@ -33,7 +37,9 @@ class FrameSource(
     private val context: Context,
     private val owner: LifecycleOwner,
     private val previewView: PreviewView,
-    private val onFrame: (RgbFrame, Long) -> Unit,
+    /** @param convertMs cost of YUV to upright RGB, which scales with the
+     *   analysis resolution and is invisible in the pipeline's own timings. */
+    private val onFrame: (RgbFrame, Long, Long) -> Unit,
 ) {
     private val executor = Executors.newSingleThreadExecutor()
     private val busy = AtomicBoolean(false)
@@ -49,6 +55,38 @@ class FrameSource(
     var frameHeight: Int = 0
         private set
 
+    /**
+     * Asks for a 16:9 analysis stream at [ANALYSIS_TARGET].
+     *
+     * Two reasons, and the second is the one that matters.
+     *
+     * CameraX defaults ImageAnalysis to roughly 640x480. That is a 0.3 MP,
+     * 4:3 stream, heavily binned, which is a poorer picture than the sensor
+     * can give. It does **not** make detections smaller in the model input,
+     * since the letterbox caps the long side at the model size either way,
+     * but it does mean those pixels carry less real detail than the
+     * full-resolution photographs the server scores.
+     *
+     * The field of view is the sharper issue. The preview is 16:9 from the
+     * sensor; a 4:3 analysis stream is a different crop of it. Boxes are
+     * computed against the analysis frame and drawn over the preview, so a
+     * mismatch between the two puts every box slightly wrong, in a way that
+     * looks like a model problem. Asking both for 16:9 keeps them agreeing.
+     *
+     * FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER rather than an exact size,
+     * because a camera that cannot provide this should give the nearest it
+     * has instead of failing to bind.
+     */
+    private fun analysisResolution(): ResolutionSelector = ResolutionSelector.Builder()
+        .setAspectRatioStrategy(AspectRatioStrategy.RATIO_16_9_FALLBACK_AUTO_STRATEGY)
+        .setResolutionStrategy(
+            ResolutionStrategy(
+                ANALYSIS_TARGET,
+                ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER,
+            ),
+        )
+        .build()
+
     fun start() {
         val future = ProcessCameraProvider.getInstance(context)
         future.addListener({
@@ -62,6 +100,7 @@ class FrameSource(
             val analysis = ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
+                .setResolutionSelector(analysisResolution())
                 .build()
                 .also { it.setAnalyzer(executor, ::analyze) }
 
@@ -105,10 +144,12 @@ class FrameSource(
                 uvPixelStride = image.planes[1].pixelStride,
             )
 
+            val t0 = android.os.SystemClock.elapsedRealtime()
             val frame = YuvToRgb.convert(planes, rotation, buffer)
+            val convertMs = android.os.SystemClock.elapsedRealtime() - t0
             frameWidth = frame.width
             frameHeight = frame.height
-            onFrame(frame, image.imageInfo.timestamp)
+            onFrame(frame, image.imageInfo.timestamp, convertMs)
         } catch (t: Throwable) {
             Log.e(TAG, "frame dropped after an error", t)
         } finally {
@@ -139,5 +180,17 @@ class FrameSource(
 
     private companion object {
         const val TAG = "FrameSource"
+
+        /**
+         * 1280x720, not 1920x1080.
+         *
+         * The YUV to RGB conversion is O(source pixels) and runs in Kotlin on
+         * every frame, so the source size is paid in full each time, while
+         * the letterbox into the model input is O(output pixels) and costs
+         * the same whatever arrives. 1280x720 is 3x the default's pixels and
+         * 1920x1080 is 6.75x, for a picture the model mostly discards on its
+         * way down to 640. Measure before raising it further.
+         */
+        val ANALYSIS_TARGET = Size(1280, 720)
     }
 }

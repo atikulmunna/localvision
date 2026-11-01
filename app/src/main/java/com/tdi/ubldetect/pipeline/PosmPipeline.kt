@@ -37,7 +37,17 @@ class PosmPipeline(
 
     private val output = FloatArray(outputShape.fold(1) { a, b -> a * b })
 
-    fun process(frame: RgbFrame, timestampNs: Long, useAllowlist: Boolean): FrameResult {
+    /**
+     * @param extraTimings stages measured outside this pipeline, such as the
+     *   YUV conversion, so the on-screen readout accounts for the whole frame
+     *   rather than only the part this class happens to own.
+     */
+    fun process(
+        frame: RgbFrame,
+        timestampNs: Long,
+        useAllowlist: Boolean,
+        extraTimings: Map<String, Long> = emptyMap(),
+    ): FrameResult {
         val t0 = SystemClock.elapsedRealtime()
         val transform = InputTensor.letterboxToNchw(frame, inputSize, input)
 
@@ -58,7 +68,7 @@ class PosmPipeline(
             detections = detections,
             frameTimestampNs = timestampNs,
             transform = transform,
-            timingsMs = mapOf(
+            timingsMs = extraTimings + mapOf(
                 "prep" to (t1 - t0),
                 "infer" to (t2 - t1),
                 "decode" to (t3 - t2),
