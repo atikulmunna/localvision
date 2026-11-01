@@ -127,8 +127,91 @@ weights but leaves activations and some layers in float. Two POSM resolutions
 are therefore 114 MB on their own, and the spec's "roughly 150 MB total"
 estimate will not survive adding QPDS. Revisit at Task 12 with real numbers.
 
+## QPDS segmentation
+
+`qpds_seg_640.tflite`, `qpds_seg_960.tflite`. Source `QPDS-seg.pt`, yolo26x-seg,
+1 class (product), trained at 1280.
+
+It exported without incident. Ultralytics issue #23557 is a YOLO26 **seg**
+model failing TFLite export, so this was the task most likely to fail; the
+modern LiteRT path handled it and the documented `end2end=False` fallback was
+not needed.
+
+### Input
+
+Same as POSM: `[1, 3, N, N]` float32 NCHW, 0.0 to 1.0, RGB, letterboxed with
+114 grey. N is 640 or 960.
+
+### Outputs
+
+Two tensors.
+
+**Rows**, `[1, 300, 38]` float32. The detect layout with the mask coefficients
+appended:
+
+| Column | Meaning |
+|---|---|
+| 0 to 3 | `x1, y1, x2, y2` in letterboxed input pixels |
+| 4 | score, 0.0 to 1.0 |
+| 5 | class id, always `0`: this model has one class |
+| 6 to 37 | 32 mask coefficients, roughly -7.4 to +7.7 |
+
+Score-sorted descending and zero-tailed, same as POSM, so the decoder stops at
+the first row below threshold.
+
+**Protos**, `[1, 32, P, P]` float32, where **P is N/4**: 160 at imgsz 640, 240
+at 960. Not the 64 the plan guessed, which is why this is measured rather than
+assumed.
+
+### Building a mask
+
+`sigmoid(coeffs . protos)` over the 32 channels, giving a P by P grid in 0..1.
+An instance's box maps into that grid by dividing by 4.
+
+Verified on a real shelf photo (1440x1080, 24 instances at `seg_conf` 0.20):
+for the top instance the mask averaged **0.948 inside its box against 0.374
+over the whole grid**, which is the separation the crop builder depends on.
+
+## QPDS classification
+
+`qpds_cls_224.tflite`. Source `QPDS-cls.pt`, yolo26x-cls, 56 classes.
+
+| Property | Value |
+|---|---|
+| Input | `[1, 3, 224, 224]` float32 NCHW, 0.0 to 1.0, RGB |
+| Output | `[1, 56]` float32 |
+
+**The output is already softmaxed**, summing to 1.0000. It is not logits, so
+nothing downstream should apply softmax again.
+
+Sanity check on the same photo: the top instance classified as
+`dove_serum_bar` at 1.000, on a DOVE and LUX International shelf. Correct
+product family, so the crop geometry and the class indices line up.
+
+## File sizes, and the asset budget
+
+| File | Size |
+|---|---|
+| `posm_640.tflite` | 56.8 MB |
+| `posm_960.tflite` | 57.0 MB |
+| `qpds_seg_640.tflite` | 63.9 MB |
+| `qpds_seg_960.tflite` | 64.1 MB |
+| `qpds_cls_224.tflite` | 28.9 MB |
+| **All five** | **270.7 MB** |
+
+The spec's section 11 estimated "roughly 150 MB". That was wrong, because
+`w8a32` halves a checkpoint rather than quartering it: dynamic int8 quantizes
+weights but leaves activations and some layers in float.
+
+Shipping one resolution per model instead of two brings it to about 150 MB and
+costs the in-app resolution switch. That is a decision for whoever ships this,
+not a defect.
+
 ## Still to measure
 
-QPDS-seg and QPDS-cls, at Task 12. Record there: both seg output tensors with
-the proto grid shape and channel count, whether the mask coefficients are the
-trailing columns of the row tensor, and the cls input range and output length.
+
+Nothing. All five shipped models are recorded above.
+
+Static int8 (Task 18) will need its own pass, because Ultralytics force-
+disables the NMS-free head for `quantize=8`, which changes the row contract
+and brings NMS back.
