@@ -1,0 +1,26 @@
+# LiteRT export tooling.
+#
+# Linux x86_64 or macOS only: Ultralytics LiteRT export does not run on Windows,
+# so this installs inside WSL2 Ubuntu, never in the Windows Python.
+#
+# Deliberately unpinned on first install, because the whole point is to be on a
+# release newer than the 8.4.11 that UBL-standalone pins. Ultralytics issue
+# #23557 is a YOLO26 segmentation export failing on exactly 8.4.11, inside the
+# old onnx2tf path that current releases no longer use.
+#
+# Resolved versions from the first install are recorded in tools/README.md.
+
+ultralytics
+
+# Required by Ultralytics LiteRT export and NOT installed by it: 8.4.197 traces
+# PyTorch directly through litert_torch. Without this, every export fails with
+# ModuleNotFoundError: No module named 'litert_torch'. Installing it downgrades
+# torch to 2.14.1.
+litert-torch
+
+ai-edge-litert
+pytest
+
+# gen_catalog.py reads the UBL standards YAML. Ultralytics 8.4.x no longer
+# depends on PyYAML, so it has to be asked for explicitly.
+pyyaml

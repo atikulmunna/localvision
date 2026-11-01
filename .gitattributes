@@ -1,0 +1,15 @@
+# Keep LF in the repository and in the working tree.
+#
+# This project is edited on Windows but its tooling runs under WSL2 Linux, and
+# Gradle's wrapper script must be LF to execute at all. Letting Git convert to
+# CRLF on checkout breaks both.
+* text=auto eol=lf
+
+# Binary, never touched
+*.tflite binary
+*.pt binary
+*.onnx binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.jar binary

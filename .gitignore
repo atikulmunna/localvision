@@ -10,6 +10,9 @@ tasks.md
 *.tflite
 *.onnx
 app/src/main/assets/models/
+exports/
+validation/images/
+validation/server/
 
 # Android / Gradle
 *.iml
@@ -29,6 +32,7 @@ Thumbs.db
 
 # Python export tooling
 __pycache__/
+.pytest_cache/
 *.py[cod]
 .venv/
 venv/
