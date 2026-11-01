@@ -1,0 +1,35 @@
+{
+  "qpds_slabs": [
+    {
+      "key": "DOUBLE_SHELF",
+      "subtitle": "Nutrition",
+      "class_ids": [3, 7],
+      "display": {
+        "3": "Standard Horlicks Jar",
+        "7": "Chocolate Horlicks Jar"
+      },
+      "missing_from_model": [],
+      "unmapped_model_classes": []
+    },
+    {
+      "key": "ALL_MISSING",
+      "subtitle": "Skin Care",
+      "class_ids": [],
+      "display": {},
+      "missing_from_model": ["horlicks_lite"],
+      "unmapped_model_classes": ["orphan_class"]
+    }
+  ],
+  "posm_categories": [
+    {
+      "key": "oral_care",
+      "subtitle": "2 materials",
+      "class_ids": [12],
+      "display": {
+        "12": "Closeup LS Poster"
+      },
+      "missing_from_model": [],
+      "unmapped_model_classes": ["orphan_class"]
+    }
+  ]
+}
