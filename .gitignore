@@ -1,0 +1,34 @@
+# Planning, spec and analysis docs (local only, never commit)
+docs/superpowers/
+CLAUDE.md
+tasks.md
+*srs*
+*SRS*
+
+# Model weights and exports (large; produced by tools/, never committed)
+*.pt
+*.tflite
+*.onnx
+app/src/main/assets/models/
+
+# Android / Gradle
+*.iml
+.gradle/
+local.properties
+.cxx/
+build/
+captures/
+output.json
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Python export tooling
+__pycache__/
+*.py[cod]
+.venv/
+venv/
