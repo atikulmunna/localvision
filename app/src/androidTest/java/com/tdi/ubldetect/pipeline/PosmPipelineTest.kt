@@ -10,6 +10,7 @@ import com.tdi.ubldetect.catalog.Mode
 import com.tdi.ubldetect.imaging.RgbFrame
 import com.tdi.ubldetect.infer.DelegateKind
 import com.tdi.ubldetect.infer.TfliteRunner
+import com.tdi.ubldetect.ui.ControlsState
 import java.nio.ByteBuffer
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -69,8 +70,8 @@ class PosmPipelineTest {
     @Test
     fun processesAFixtureShelfImageAndLabelsAtLeastOneMaterial() {
         runner("models/posm_640.tflite").use { r ->
-            val result = PosmPipeline(r, entry("skin_cleansing"), 0.30f)
-                .process(fixtureFrame("posm_fixture.jpg"), 1L, useAllowlist = true)
+            val result = PosmPipeline(r, entry("skin_cleansing"))
+                .process(fixtureFrame("posm_fixture.jpg"), 1L, ControlsState())
 
             assertTrue("expected at least one detection", result.detections.isNotEmpty())
             assertTrue(result.timingsMs.containsKey("infer"))
@@ -81,8 +82,8 @@ class PosmPipelineTest {
     @Test
     fun findsTheClassTheReferenceFoundOnThisImage() {
         runner("models/posm_640.tflite").use { r ->
-            val result = PosmPipeline(r, entry("skin_cleansing"), 0.30f)
-                .process(fixtureFrame("posm_fixture.jpg"), 1L, useAllowlist = true)
+            val result = PosmPipeline(r, entry("skin_cleansing"))
+                .process(fixtureFrame("posm_fixture.jpg"), 1L, ControlsState())
             assertTrue(
                 "expected class 13, got ${result.detections.map { it.classId }}",
                 result.detections.any { it.classId == 13 },
@@ -98,8 +99,8 @@ class PosmPipelineTest {
         // this box, they change which class wins. A filtered downscale
         // "improvement" in InputTensor fails here.
         runner("models/posm_640.tflite").use { r ->
-            val result = PosmPipeline(r, entry("skin_cleansing"), 0.30f)
-                .process(fixtureFrame("posm_fixture.jpg"), 1L, useAllowlist = true)
+            val result = PosmPipeline(r, entry("skin_cleansing"))
+                .process(fixtureFrame("posm_fixture.jpg"), 1L, ControlsState())
             val box = result.detections.first { it.classId == 13 }.box
             assertEquals(86.2f, box.left, 20f)
             assertEquals(246.1f, box.top, 20f)
@@ -109,10 +110,10 @@ class PosmPipelineTest {
     @Test
     fun allowlistOffReturnsAtLeastAsManyDetectionsAsAllowlistOn() {
         runner("models/posm_640.tflite").use { r ->
-            val p = PosmPipeline(r, entry("skin_cleansing"), 0.30f)
+            val p = PosmPipeline(r, entry("skin_cleansing"))
             val frame = fixtureFrame("posm_fixture.jpg")
-            val on = p.process(frame, 1L, useAllowlist = true)
-            val off = p.process(frame, 2L, useAllowlist = false)
+            val on = p.process(frame, 1L, ControlsState(useAllowlist = true))
+            val off = p.process(frame, 2L, ControlsState(useAllowlist = false))
             assertTrue(off.detections.size >= on.detections.size)
         }
     }
@@ -122,9 +123,27 @@ class PosmPipelineTest {
         // The same photo through the nutrition allowlist: class 13 is a skin
         // cleansing material, so it must not be labelled as a nutrition one.
         runner("models/posm_640.tflite").use { r ->
-            val result = PosmPipeline(r, entry("nutrition"), 0.30f)
-                .process(fixtureFrame("posm_fixture.jpg"), 1L, useAllowlist = true)
+            val result = PosmPipeline(r, entry("nutrition"))
+                .process(fixtureFrame("posm_fixture.jpg"), 1L, ControlsState())
             assertTrue(result.detections.none { it.classId == 13 })
+        }
+    }
+
+    @Test
+    fun raisingTheConfidenceThresholdDropsDetectionsWithoutRebuilding() {
+        // ControlsState.requiresReload says a threshold change needs no model
+        // swap. That is only true if the threshold is read per frame. Taking
+        // it at construction instead makes the slider inert until something
+        // else happens to rebuild the pipeline.
+        runner("models/posm_640.tflite").use { r ->
+            val p = PosmPipeline(r, entry("skin_cleansing"))
+            val frame = fixtureFrame("posm_fixture.jpg")
+            val low = p.process(frame, 1L, ControlsState(scoreThreshold = 0.30f))
+            val high = p.process(frame, 2L, ControlsState(scoreThreshold = 0.95f))
+            assertTrue(
+                "0.95 kept ${high.detections.size}, 0.30 kept ${low.detections.size}",
+                high.detections.size < low.detections.size,
+            )
         }
     }
 
@@ -132,8 +151,8 @@ class PosmPipelineTest {
     fun theResultCarriesTheFramesOwnTimestampAndTransform() {
         // The overlay needs both to place late results correctly.
         runner("models/posm_640.tflite").use { r ->
-            val result = PosmPipeline(r, entry("skin_cleansing"), 0.30f)
-                .process(fixtureFrame("posm_fixture.jpg"), 4242L, useAllowlist = true)
+            val result = PosmPipeline(r, entry("skin_cleansing"))
+                .process(fixtureFrame("posm_fixture.jpg"), 4242L, ControlsState())
             assertEquals(4242L, result.frameTimestampNs)
             assertEquals(640, result.transform.inputSize)
         }

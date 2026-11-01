@@ -7,6 +7,7 @@ import com.tdi.ubldetect.imaging.RgbFrame
 import com.tdi.ubldetect.infer.TfliteRunner
 import com.tdi.ubldetect.infer.Yolo26DetectDecoder
 import com.tdi.ubldetect.model.FrameResult
+import com.tdi.ubldetect.ui.ControlsState
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -20,15 +21,14 @@ import java.nio.ByteOrder
  * live camera, so a per-frame allocation of several megabytes would spend
  * more time in the garbage collector than in the model.
  *
- * @param scoreThreshold defaults to the server's `posm.confidence` of 0.30,
- *   copied rather than re-tuned so that any difference from the server traces
- *   to the export and the quantization alone
+ * Confidence and the allowlist are read from the controls on every frame,
+ * not held, so moving the slider takes effect on the next frame rather than
+ * at the next rebuild.
  */
 class PosmPipeline(
     private val runner: TfliteRunner,
     private val entry: CatalogEntry,
-    private val scoreThreshold: Float,
-) {
+) : FramePipeline {
     private val inputSize = runner.inputSize
     private val outputShape = runner.outputShapes()[0]
 
@@ -42,11 +42,11 @@ class PosmPipeline(
      *   YUV conversion, so the on-screen readout accounts for the whole frame
      *   rather than only the part this class happens to own.
      */
-    fun process(
+    override fun process(
         frame: RgbFrame,
         timestampNs: Long,
-        useAllowlist: Boolean,
-        extraTimings: Map<String, Long> = emptyMap(),
+        state: ControlsState,
+        extraTimings: Map<String, Long>,
     ): FrameResult {
         val t0 = SystemClock.elapsedRealtime()
         val transform = InputTensor.letterboxToNchw(frame, inputSize, input)
@@ -58,8 +58,8 @@ class PosmPipeline(
         val detections = Yolo26DetectDecoder.decode(
             raw = output,
             shape = outputShape,
-            scoreThreshold = scoreThreshold,
-            allowed = if (useAllowlist) entry.classIds else null,
+            scoreThreshold = state.scoreThreshold,
+            allowed = if (state.useAllowlist) entry.classIds else null,
             t = transform,
         )
         val t3 = SystemClock.elapsedRealtime()

@@ -20,7 +20,10 @@ import com.tdi.ubldetect.imaging.RgbFrame
 import com.tdi.ubldetect.infer.ModelAssetMissing
 import com.tdi.ubldetect.infer.TfliteRunner
 import com.tdi.ubldetect.model.FrameResult
+import com.tdi.ubldetect.infer.ClsRunner
+import com.tdi.ubldetect.pipeline.FramePipeline
 import com.tdi.ubldetect.pipeline.PosmPipeline
+import com.tdi.ubldetect.pipeline.QpdsPipeline
 
 /**
  * The live screen: preview underneath, boxes and labels on top, controls at
@@ -39,8 +42,9 @@ class CameraActivity : ComponentActivity() {
     private lateinit var catalog: Catalog
 
     private var frameSource: FrameSource? = null
-    private var runner: TfliteRunner? = null
-    private var pipeline: PosmPipeline? = null
+    private var runners: List<TfliteRunner> = emptyList()
+    private var pipeline: FramePipeline? = null
+    private lateinit var mode: Mode
 
     @Volatile
     private var state = ControlsState()
@@ -55,7 +59,7 @@ class CameraActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val mode = Mode.valueOf(intent.getStringExtra(EXTRA_MODE) ?: Mode.POSM.name)
+        mode = Mode.valueOf(intent.getStringExtra(EXTRA_MODE) ?: Mode.POSM.name)
         val key = intent.getStringExtra(EXTRA_KEY).orEmpty()
 
         catalog = Catalog.parse(assets.open("catalog.json").bufferedReader().readText())
@@ -87,12 +91,6 @@ class CameraActivity : ComponentActivity() {
         // The preview stays full bleed; only the chrome above it is inset.
         overlayView.padForSystemBars(bottom = false)
         controls.padForSystemBars(top = false)
-
-        if (mode == Mode.QPDS) {
-            Toast.makeText(this, "QPDS arrives in a later phase", Toast.LENGTH_LONG).show()
-            finish()
-            return
-        }
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
             == PackageManager.PERMISSION_GRANTED
@@ -151,39 +149,50 @@ class CameraActivity : ComponentActivity() {
     }
 
     /**
-     * Swaps in the model for [s], one model resident at a time.
+     * Swaps in the models for [s], releasing the old ones first.
      *
-     * The order matters. Opening the new model before closing the old keeps
-     * two 57 MB mapped files alive through every swap; ten resolution
-     * changes measured 678 MB of mapped pages still resident, released only
-     * when the system asked for memory back. So the asset is checked first,
-     * the old model is released, and only then is the new one opened.
+     * The order matters. Opening before closing keeps two 57 MB mapped files
+     * alive through every swap; ten resolution changes measured 678 MB of
+     * mapped pages still resident, released only when the system asked for
+     * memory back. So the assets are checked first, the old models are
+     * released, and only then are the new ones opened.
      *
-     * @return false when the model for this state is not bundled
+     * QPDS needs two models, a segmenter and a classifier, and the
+     * classifier has one resolution. If either is missing nothing is swapped.
+     *
+     * @return false when a model for this state is not bundled
      */
     private fun buildPipeline(s: ControlsState): Boolean {
-        val asset = s.assetFor("posm")
-        if (!TfliteRunner.assetExists(this, asset)) {
+        val assets = when (mode) {
+            Mode.POSM -> listOf(s.assetFor("posm"))
+            Mode.QPDS -> listOf(s.assetFor("qpds_seg"), "models/qpds_cls_224.tflite")
+        }
+        val missing = assets.firstOrNull { !TfliteRunner.assetExists(this, it) }
+        if (missing != null) {
             // Review Focus 5: a resolution whose file was never shipped is a
             // message, not a crash and not a silent no-op. Checked before
-            // anything is torn down, so the running model keeps running.
-            toast("Model not bundled: $asset")
+            // anything is torn down, so the running models keep running.
+            toast("Model not bundled: $missing")
             return false
         }
 
         pipeline = null
-        runner?.close()
-        runner = null
+        runners.forEach { it.close() }
+        runners = emptyList()
 
-        val next = try {
-            TfliteRunner(this, asset, s.delegate)
+        val opened = try {
+            assets.map { TfliteRunner(this, it, s.delegate) }
         } catch (e: ModelAssetMissing) {
             toast("Model not bundled: ${e.assetPath}")
             return false
         }
-        runner = next
-        pipeline = PosmPipeline(next, entry, s.scoreThreshold)
-        toast("${s.imgsz} on ${next.activeDelegate}")
+        runners = opened
+
+        pipeline = when (mode) {
+            Mode.POSM -> PosmPipeline(opened[0], entry)
+            Mode.QPDS -> QpdsPipeline(opened[0], ClsRunner(opened[1]), entry)
+        }
+        toast("${mode.name} ${s.imgsz} on ${opened[0].activeDelegate}")
         return true
     }
 
@@ -197,7 +206,7 @@ class CameraActivity : ComponentActivity() {
             // Threshold is read per frame, so the slider takes effect on the
             // next frame without touching the interpreter.
             val s = state
-            val result = pipeline?.process(frame, timestampNs, s.useAllowlist, mapOf("yuv" to convertMs))
+            val result = pipeline?.process(frame, timestampNs, s, mapOf("yuv" to convertMs))
             lastFrame = frame
             lastResult = result
             runOnUiThread {
@@ -235,7 +244,7 @@ class CameraActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         frameSource?.stop()
-        runner?.close()
+        runners.forEach { it.close() }
     }
 
     companion object {
