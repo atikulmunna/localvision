@@ -63,9 +63,11 @@ dependencies {
     implementation(libs.litert.gpu)
 
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.core.ktx)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.core)
 }

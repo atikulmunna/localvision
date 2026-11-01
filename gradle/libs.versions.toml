@@ -14,6 +14,8 @@ camerax = "1.4.2"
 litert = "1.4.0"
 litertGpu = "1.4.0"
 kotlinxSerialization = "1.8.0"
+coreKtx = "1.15.0"
+androidxTestCore = "1.6.1"
 junit = "4.13.2"
 androidxTestJunit = "1.2.1"
 androidxTestRunner = "1.6.2"
@@ -31,9 +33,13 @@ litert-gpu = { module = "com.google.ai.edge.litert:litert-gpu", version.ref = "l
 
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 
+# WindowInsetsCompat: the app targets SDK 36 and so lays out edge to edge.
+core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
+
 junit = { module = "junit:junit", version.ref = "junit" }
 androidx-test-junit = { module = "androidx.test.ext:junit", version.ref = "androidxTestJunit" }
 androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxTestRunner" }
+androidx-test-core = { module = "androidx.test:core", version.ref = "androidxTestCore" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
