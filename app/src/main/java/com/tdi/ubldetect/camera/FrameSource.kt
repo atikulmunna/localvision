@@ -117,6 +117,21 @@ class FrameSource(
         }
     }
 
+    /**
+     * Runs [block] on the analysis thread, never alongside a frame.
+     *
+     * Swapping the model is the reason this exists. The interpreter is a
+     * native object: closing it from the UI thread while this thread is
+     * inside `run()` is a use-after-free, and it crashed exactly that way
+     * (SIGSEGV under ImageAnalysisAbstractAnalyzer.analyzeImage). The
+     * analyzer runs on a single-threaded executor, so work submitted here is
+     * serialised against frame processing by construction rather than by a
+     * lock someone has to remember to take.
+     */
+    fun post(block: () -> Unit) {
+        if (!executor.isShutdown) executor.execute(block)
+    }
+
     fun stop() {
         provider?.unbindAll()
         executor.shutdown()

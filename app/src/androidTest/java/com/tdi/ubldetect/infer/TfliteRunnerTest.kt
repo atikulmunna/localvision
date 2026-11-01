@@ -6,6 +6,8 @@ import androidx.test.platform.app.InstrumentationRegistry
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import org.junit.Assert.assertArrayEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -46,6 +48,16 @@ class TfliteRunnerTest {
             assertEquals(640, r.inputSize)
             assertArrayEquals(intArrayOf(1, 300, 6), r.outputShapes()[0])
         }
+    }
+
+    @Test
+    fun assetExistsAnswersBeforeAnythingIsLoaded() {
+        // Lets a caller decide whether a swap is possible before tearing down
+        // the model it already has. Without it, swapping resolution means
+        // holding two 57 MB models at once, which on ten swaps left 678 MB
+        // of mapped pages resident until the system asked for them back.
+        assertTrue(TfliteRunner.assetExists(ctx, "models/posm_640.tflite"))
+        assertFalse(TfliteRunner.assetExists(ctx, "models/posm_1280.tflite"))
     }
 
     @Test

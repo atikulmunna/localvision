@@ -56,6 +56,7 @@ class TfliteRunner(
     private val gpuDelegate: GpuDelegate?
 
     init {
+        if (!assetExists(context, assetPath)) throw ModelAssetMissing(assetPath)
         val model = mapModel(context, assetPath)
 
         var delegate: GpuDelegate? = null
@@ -127,9 +128,23 @@ class TfliteRunner(
         gpuDelegate?.close()
     }
 
-    private companion object {
-        const val TAG = "TfliteRunner"
-        const val CPU_THREADS = 4
+    companion object {
+        private const val TAG = "TfliteRunner"
+        private const val CPU_THREADS = 4
+
+        /**
+         * Whether a model file is bundled, without loading it.
+         *
+         * Lets a caller decide a swap is possible before tearing down the
+         * model it already has. Opening the new one first means two 57 MB
+         * models resident at once; measured over ten resolution swaps that
+         * left 678 MB of mapped pages in PSS until the system asked for
+         * them back.
+         */
+        fun assetExists(context: Context, assetPath: String): Boolean = runCatching {
+            context.assets.openFd(assetPath).close()
+            true
+        }.getOrDefault(false)
 
         /**
          * Maps the asset without copying it.
