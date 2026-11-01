@@ -1,0 +1,897 @@
+{
+  "qpds_slabs": [
+    {
+      "key": "DOUBLE_SHELF",
+      "subtitle": "Nutrition",
+      "class_ids": [
+        22,
+        26
+      ],
+      "display": {
+        "22": "Chocolate Horlicks Jar",
+        "26": "Standard Horlicks Jar"
+      },
+      "missing_from_model": [],
+      "unmapped_model_classes": [
+        "clear_cac",
+        "clear_csm_large",
+        "dove_noc",
+        "gl_aryuvedic_crm",
+        "gl_foundation_crm",
+        "horlicks_lite",
+        "sunsilk_black_large",
+        "sunsilk_tl_large",
+        "sunsilk_volume",
+        "tresemme_ks_large",
+        "tresemme_ks_small",
+        "tresemme_ks_white"
+      ]
+    },
+    {
+      "key": "DOVE_LUX_INTERNATIONAL",
+      "subtitle": "Skin Cleansing",
+      "class_ids": [
+        7,
+        14,
+        15,
+        31,
+        32
+      ],
+      "display": {
+        "7": "Dove Cream Bar 135g",
+        "14": "Dove Pink Bar 135g",
+        "15": "Dove Serum Bar 135g",
+        "31": "International Lux Bouncy & Bright 125g",
+        "32": "International Lux Smooth & Radiant 125g"
+      },
+      "missing_from_model": [],
+      "unmapped_model_classes": [
+        "clear_cac",
+        "clear_csm_large",
+        "dove_noc",
+        "gl_aryuvedic_crm",
+        "gl_foundation_crm",
+        "horlicks_lite",
+        "sunsilk_black_large",
+        "sunsilk_tl_large",
+        "sunsilk_volume",
+        "tresemme_ks_large",
+        "tresemme_ks_small",
+        "tresemme_ks_white"
+      ]
+    },
+    {
+      "key": "HAIR_CARE_DIAMOND_SLAB",
+      "subtitle": "Hair Care",
+      "class_ids": [
+        2,
+        5,
+        6,
+        8,
+        9,
+        10,
+        11,
+        43,
+        44,
+        45,
+        46,
+        47,
+        49
+      ],
+      "display": {
+        "2": "Clear Men Shampoo Cool Sport Menthol Anti Dandruff 330ml",
+        "5": "Dove Conditioner Hairfall Rescue 170ml",
+        "6": "Dove Conditioner Intense Repair 170ml",
+        "8": "Dove Shampoo Hairfall Rescue 650ml",
+        "9": "Dove Shampoo Hairfall Rescue 340ml",
+        "10": "Dove Shampoo Intensive Repair 650ml",
+        "11": "Dove Shampoo Intensive Repair 340ml",
+        "43": "Sunsilk Shampoo Stunning Black Shine 375ml",
+        "44": "Sunsilk Shampoo Hair Fall Solution 375ml",
+        "45": "Sunsilk Rinse Out Conditioner HFS 180ml",
+        "46": "Sunsilk Shampoo Onion & Jojoba Oil 375ml",
+        "47": "Sunsilk Super Shine Hair Serum 100ml",
+        "49": "Sunsilk Shampoo Lusciously Thick & Long 375ml"
+      },
+      "missing_from_model": [],
+      "unmapped_model_classes": [
+        "clear_cac",
+        "clear_csm_large",
+        "dove_noc",
+        "gl_aryuvedic_crm",
+        "gl_foundation_crm",
+        "horlicks_lite",
+        "sunsilk_black_large",
+        "sunsilk_tl_large",
+        "sunsilk_volume",
+        "tresemme_ks_large",
+        "tresemme_ks_small",
+        "tresemme_ks_white"
+      ]
+    },
+    {
+      "key": "HAIR_CARE_GOLD_SLAB",
+      "subtitle": "Hair Care",
+      "class_ids": [
+        2,
+        5,
+        6,
+        9,
+        11,
+        43,
+        44,
+        45,
+        46,
+        47,
+        49
+      ],
+      "display": {
+        "2": "Clear Men Shampoo Cool Sport Menthol Anti Dandruff 330ml",
+        "5": "Dove Conditioner Hairfall Rescue 170ml",
+        "6": "Dove Conditioner Intense Repair 170ml",
+        "9": "Dove Shampoo Hairfall Rescue 340ml",
+        "11": "Dove Shampoo Intensive Repair 340ml",
+        "43": "Sunsilk Shampoo Stunning Black Shine 375ml",
+        "44": "Sunsilk Shampoo Hair Fall Solution 375ml",
+        "45": "Sunsilk Rinse Out Conditioner HFS 180ml",
+        "46": "Sunsilk Shampoo Onion & Jojoba Oil 375ml",
+        "47": "Sunsilk Super Shine Hair Serum 100ml",
+        "49": "Sunsilk Shampoo Lusciously Thick & Long 375ml"
+      },
+      "missing_from_model": [],
+      "unmapped_model_classes": [
+        "clear_cac",
+        "clear_csm_large",
+        "dove_noc",
+        "gl_aryuvedic_crm",
+        "gl_foundation_crm",
+        "horlicks_lite",
+        "sunsilk_black_large",
+        "sunsilk_tl_large",
+        "sunsilk_volume",
+        "tresemme_ks_large",
+        "tresemme_ks_small",
+        "tresemme_ks_white"
+      ]
+    },
+    {
+      "key": "JUNIORS_CLEAN_CORNER",
+      "subtitle": "Nutrition",
+      "class_ids": [
+        23,
+        24
+      ],
+      "display": {
+        "23": "Horlicks Junior Jar Stage-2",
+        "24": "Horlicks Junior Jar Stage-1"
+      },
+      "missing_from_model": [],
+      "unmapped_model_classes": [
+        "clear_cac",
+        "clear_csm_large",
+        "dove_noc",
+        "gl_aryuvedic_crm",
+        "gl_foundation_crm",
+        "horlicks_lite",
+        "sunsilk_black_large",
+        "sunsilk_tl_large",
+        "sunsilk_volume",
+        "tresemme_ks_large",
+        "tresemme_ks_small",
+        "tresemme_ks_white"
+      ]
+    },
+    {
+      "key": "JUNIORS_CLEAN_CORNER_LITE",
+      "subtitle": "Nutrition",
+      "class_ids": [
+        23,
+        24
+      ],
+      "display": {
+        "23": "Horlicks Junior Jar Stage-2",
+        "24": "Horlicks Junior Jar Stage-1"
+      },
+      "missing_from_model": [],
+      "unmapped_model_classes": [
+        "clear_cac",
+        "clear_csm_large",
+        "dove_noc",
+        "gl_aryuvedic_crm",
+        "gl_foundation_crm",
+        "horlicks_lite",
+        "sunsilk_black_large",
+        "sunsilk_tl_large",
+        "sunsilk_volume",
+        "tresemme_ks_large",
+        "tresemme_ks_small",
+        "tresemme_ks_white"
+      ]
+    },
+    {
+      "key": "LITE",
+      "subtitle": "Nutrition",
+      "class_ids": [
+        22,
+        26
+      ],
+      "display": {
+        "22": "Chocolate Horlicks Jar",
+        "26": "Standard Horlicks Jar"
+      },
+      "missing_from_model": [],
+      "unmapped_model_classes": [
+        "clear_cac",
+        "clear_csm_large",
+        "dove_noc",
+        "gl_aryuvedic_crm",
+        "gl_foundation_crm",
+        "horlicks_lite",
+        "sunsilk_black_large",
+        "sunsilk_tl_large",
+        "sunsilk_volume",
+        "tresemme_ks_large",
+        "tresemme_ks_small",
+        "tresemme_ks_white"
+      ]
+    },
+    {
+      "key": "LUX_BODYWASH_DISPLAY_2026_SLAB_1",
+      "subtitle": "Skin Cleansing",
+      "class_ids": [
+        27,
+        28,
+        29,
+        30
+      ],
+      "display": {
+        "27": "Lux Body Wash Magical Orchid 245ml",
+        "28": "Lux Body Wash Brightening Vitamin C 245ml",
+        "29": "Lux Body Wash Fresh Aloe 245ml",
+        "30": "Lux Body Wash Soft Rose 245ml"
+      },
+      "missing_from_model": [],
+      "unmapped_model_classes": [
+        "clear_cac",
+        "clear_csm_large",
+        "dove_noc",
+        "gl_aryuvedic_crm",
+        "gl_foundation_crm",
+        "horlicks_lite",
+        "sunsilk_black_large",
+        "sunsilk_tl_large",
+        "sunsilk_volume",
+        "tresemme_ks_large",
+        "tresemme_ks_small",
+        "tresemme_ks_white"
+      ]
+    },
+    {
+      "key": "LUX_BODYWASH_DISPLAY_2026_SLAB_2",
+      "subtitle": "Skin Cleansing",
+      "class_ids": [
+        27,
+        28,
+        29,
+        30
+      ],
+      "display": {
+        "27": "Lux Body Wash Magical Orchid 245ml",
+        "28": "Lux Body Wash Brightening Vitamin C 245ml",
+        "29": "Lux Body Wash Fresh Aloe 245ml",
+        "30": "Lux Body Wash Soft Rose 245ml"
+      },
+      "missing_from_model": [],
+      "unmapped_model_classes": [
+        "clear_cac",
+        "clear_csm_large",
+        "dove_noc",
+        "gl_aryuvedic_crm",
+        "gl_foundation_crm",
+        "horlicks_lite",
+        "sunsilk_black_large",
+        "sunsilk_tl_large",
+        "sunsilk_volume",
+        "tresemme_ks_large",
+        "tresemme_ks_small",
+        "tresemme_ks_white"
+      ]
+    },
+    {
+      "key": "LUX_GLUTA_BAR_QPDS_MAY_2026",
+      "subtitle": "Skin Cleansing",
+      "class_ids": [
+        31,
+        32
+      ],
+      "display": {
+        "31": "International Lux Bouncy & Bright 125g",
+        "32": "International Lux Smooth & Radiant 125g"
+      },
+      "missing_from_model": [],
+      "unmapped_model_classes": [
+        "clear_cac",
+        "clear_csm_large",
+        "dove_noc",
+        "gl_aryuvedic_crm",
+        "gl_foundation_crm",
+        "horlicks_lite",
+        "sunsilk_black_large",
+        "sunsilk_tl_large",
+        "sunsilk_volume",
+        "tresemme_ks_large",
+        "tresemme_ks_small",
+        "tresemme_ks_white"
+      ]
+    },
+    {
+      "key": "ORAL_CARE_TOOTHPASTE_COLUMN_2",
+      "subtitle": "Oral Care",
+      "class_ids": [
+        4,
+        33,
+        34
+      ],
+      "display": {
+        "4": "Closeup MC 145g",
+        "33": "Pepsodent Advanced Salt 140g",
+        "34": "Pepsodent GC 200g"
+      },
+      "missing_from_model": [],
+      "unmapped_model_classes": [
+        "clear_cac",
+        "clear_csm_large",
+        "dove_noc",
+        "gl_aryuvedic_crm",
+        "gl_foundation_crm",
+        "horlicks_lite",
+        "sunsilk_black_large",
+        "sunsilk_tl_large",
+        "sunsilk_volume",
+        "tresemme_ks_large",
+        "tresemme_ks_small",
+        "tresemme_ks_white"
+      ]
+    },
+    {
+      "key": "ORAL_CARE_TOOTHPASTE_COLUMN_3",
+      "subtitle": "Oral Care",
+      "class_ids": [
+        4,
+        33,
+        34
+      ],
+      "display": {
+        "4": "Closeup MC 145g",
+        "33": "Pepsodent Advanced Salt 140g",
+        "34": "Pepsodent GC 200g"
+      },
+      "missing_from_model": [],
+      "unmapped_model_classes": [
+        "clear_cac",
+        "clear_csm_large",
+        "dove_noc",
+        "gl_aryuvedic_crm",
+        "gl_foundation_crm",
+        "horlicks_lite",
+        "sunsilk_black_large",
+        "sunsilk_tl_large",
+        "sunsilk_volume",
+        "tresemme_ks_large",
+        "tresemme_ks_small",
+        "tresemme_ks_white"
+      ]
+    },
+    {
+      "key": "ORAL_QPDS_JAN_26",
+      "subtitle": "Oral Care",
+      "class_ids": [
+        3,
+        33
+      ],
+      "display": {
+        "3": "Closeup Lemon & Sea Salt 140g",
+        "33": "Pepsodent Advanced Salt 140g"
+      },
+      "missing_from_model": [],
+      "unmapped_model_classes": [
+        "clear_cac",
+        "clear_csm_large",
+        "dove_noc",
+        "gl_aryuvedic_crm",
+        "gl_foundation_crm",
+        "horlicks_lite",
+        "sunsilk_black_large",
+        "sunsilk_tl_large",
+        "sunsilk_volume",
+        "tresemme_ks_large",
+        "tresemme_ks_small",
+        "tresemme_ks_white"
+      ]
+    },
+    {
+      "key": "PONDS_HYDRATION_CORNER",
+      "subtitle": "Skin Care",
+      "class_ids": [
+        38,
+        40
+      ],
+      "display": {
+        "38": "Pond's Oil Control Super Light Gel 98g",
+        "40": "Pond's Oil Control Light Moisturiser 98g"
+      },
+      "missing_from_model": [],
+      "unmapped_model_classes": [
+        "clear_cac",
+        "clear_csm_large",
+        "dove_noc",
+        "gl_aryuvedic_crm",
+        "gl_foundation_crm",
+        "horlicks_lite",
+        "sunsilk_black_large",
+        "sunsilk_tl_large",
+        "sunsilk_volume",
+        "tresemme_ks_large",
+        "tresemme_ks_small",
+        "tresemme_ks_white"
+      ]
+    },
+    {
+      "key": "PRESTIGE_WINDOW",
+      "subtitle": "Hair Care",
+      "class_ids": [
+        12,
+        47,
+        54,
+        55
+      ],
+      "display": {
+        "12": "Dove Deep Repair Treatment Hair Mask 300ml",
+        "47": "Sunsilk Super Shine Hair Serum 100ml",
+        "54": "Tresemme Keratin Smooth Hair Mask 300ml",
+        "55": "Tresemme Keratin Smooth Anti-Frizz Hair Serum 100ml"
+      },
+      "missing_from_model": [],
+      "unmapped_model_classes": [
+        "clear_cac",
+        "clear_csm_large",
+        "dove_noc",
+        "gl_aryuvedic_crm",
+        "gl_foundation_crm",
+        "horlicks_lite",
+        "sunsilk_black_large",
+        "sunsilk_tl_large",
+        "sunsilk_volume",
+        "tresemme_ks_large",
+        "tresemme_ks_small",
+        "tresemme_ks_white"
+      ]
+    },
+    {
+      "key": "SINGLE_SHELF",
+      "subtitle": "Nutrition",
+      "class_ids": [
+        22,
+        26
+      ],
+      "display": {
+        "22": "Chocolate Horlicks Jar",
+        "26": "Standard Horlicks Jar"
+      },
+      "missing_from_model": [],
+      "unmapped_model_classes": [
+        "clear_cac",
+        "clear_csm_large",
+        "dove_noc",
+        "gl_aryuvedic_crm",
+        "gl_foundation_crm",
+        "horlicks_lite",
+        "sunsilk_black_large",
+        "sunsilk_tl_large",
+        "sunsilk_volume",
+        "tresemme_ks_large",
+        "tresemme_ks_small",
+        "tresemme_ks_white"
+      ]
+    },
+    {
+      "key": "SKIN_CARE_GAL_DIAMOND",
+      "subtitle": "Skin Care",
+      "class_ids": [
+        18,
+        19,
+        20,
+        21
+      ],
+      "display": {
+        "18": "Glow & Lovely Facewash Instaglow with Multivitamins 100g",
+        "19": "Glow & Lovely Facial Moisturiser Multi-Vitamin Cream",
+        "20": "Glow & Lovely Sunscreen SPF30 PA++ 50g",
+        "21": "Glow & Lovely Sunscreen SPF50 PA++ 50g"
+      },
+      "missing_from_model": [],
+      "unmapped_model_classes": [
+        "clear_cac",
+        "clear_csm_large",
+        "dove_noc",
+        "gl_aryuvedic_crm",
+        "gl_foundation_crm",
+        "horlicks_lite",
+        "sunsilk_black_large",
+        "sunsilk_tl_large",
+        "sunsilk_volume",
+        "tresemme_ks_large",
+        "tresemme_ks_small",
+        "tresemme_ks_white"
+      ]
+    },
+    {
+      "key": "SKIN_CARE_GAL_GOLD",
+      "subtitle": "Skin Care",
+      "class_ids": [
+        18,
+        19,
+        20,
+        21
+      ],
+      "display": {
+        "18": "Glow & Lovely Facewash Instaglow with Multivitamins 100g",
+        "19": "Glow & Lovely Facial Moisturiser Multi-Vitamin Cream",
+        "20": "Glow & Lovely Sunscreen SPF30 PA++ 50g",
+        "21": "Glow & Lovely Sunscreen SPF50 PA++ 50g"
+      },
+      "missing_from_model": [],
+      "unmapped_model_classes": [
+        "clear_cac",
+        "clear_csm_large",
+        "dove_noc",
+        "gl_aryuvedic_crm",
+        "gl_foundation_crm",
+        "horlicks_lite",
+        "sunsilk_black_large",
+        "sunsilk_tl_large",
+        "sunsilk_volume",
+        "tresemme_ks_large",
+        "tresemme_ks_small",
+        "tresemme_ks_white"
+      ]
+    },
+    {
+      "key": "SKIN_CARE_PONDS_DIAMOND",
+      "subtitle": "Skin Care",
+      "class_ids": [
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41
+      ],
+      "display": {
+        "35": "Pond's Bright Beauty Serum Cream 35g",
+        "36": "Pond's Face Wash Bright Beauty 100g",
+        "37": "Pond's Face Wash Bright Miracle Detox 100g",
+        "38": "Pond's Oil Control Super Light Gel 98g",
+        "39": "Pond's Face Wash Hydra Miracle Gentle Gel 100g",
+        "40": "Pond's Oil Control Light Moisturiser 98g",
+        "41": "Pond's Face Wash Oil Control 100g"
+      },
+      "missing_from_model": [],
+      "unmapped_model_classes": [
+        "clear_cac",
+        "clear_csm_large",
+        "dove_noc",
+        "gl_aryuvedic_crm",
+        "gl_foundation_crm",
+        "horlicks_lite",
+        "sunsilk_black_large",
+        "sunsilk_tl_large",
+        "sunsilk_volume",
+        "tresemme_ks_large",
+        "tresemme_ks_small",
+        "tresemme_ks_white"
+      ]
+    },
+    {
+      "key": "SKIN_CARE_PONDS_GOLD",
+      "subtitle": "Skin Care",
+      "class_ids": [
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41
+      ],
+      "display": {
+        "35": "Pond's Bright Beauty Serum Cream 35g",
+        "36": "Pond's Face Wash Bright Beauty 100g",
+        "37": "Pond's Face Wash Bright Miracle Detox 100g",
+        "38": "Pond's Oil Control Super Light Gel 98g",
+        "39": "Pond's Face Wash Hydra Miracle Gentle Gel 100g",
+        "40": "Pond's Oil Control Light Moisturiser 98g",
+        "41": "Pond's Face Wash Oil Control 100g"
+      },
+      "missing_from_model": [],
+      "unmapped_model_classes": [
+        "clear_cac",
+        "clear_csm_large",
+        "dove_noc",
+        "gl_aryuvedic_crm",
+        "gl_foundation_crm",
+        "horlicks_lite",
+        "sunsilk_black_large",
+        "sunsilk_tl_large",
+        "sunsilk_volume",
+        "tresemme_ks_large",
+        "tresemme_ks_small",
+        "tresemme_ks_white"
+      ]
+    },
+    {
+      "key": "SKIN_INNOVATION_CORNER_Q1_26",
+      "subtitle": "Skin Care",
+      "class_ids": [
+        20,
+        21
+      ],
+      "display": {
+        "20": "Glow & Lovely Sunscreen SPF30 PA++ 50g",
+        "21": "Glow & Lovely Sunscreen SPF50 PA++ 50g"
+      },
+      "missing_from_model": [],
+      "unmapped_model_classes": [
+        "clear_cac",
+        "clear_csm_large",
+        "dove_noc",
+        "gl_aryuvedic_crm",
+        "gl_foundation_crm",
+        "horlicks_lite",
+        "sunsilk_black_large",
+        "sunsilk_tl_large",
+        "sunsilk_volume",
+        "tresemme_ks_large",
+        "tresemme_ks_small",
+        "tresemme_ks_white"
+      ]
+    }
+  ],
+  "posm_categories": [
+    {
+      "key": "fabric",
+      "subtitle": "18 materials",
+      "class_ids": [
+        34
+      ],
+      "display": {
+        "34": "DUMMY SURF EXCEL SHOPFIN SEP26"
+      },
+      "missing_from_model": [
+        "surf_excel_expert_hanger_26",
+        "surf_excel_expert_poster_26",
+        "surf_excel_expert_shelf_strip_26",
+        "surf_excel_expert_sunshade_banner_26",
+        "surf_excel_powder_combo_poster_jun26",
+        "sxl_shelftalker",
+        "wheel_poster_dec25",
+        "wheel_sunshade_dec25"
+      ],
+      "unmapped_model_classes": []
+    },
+    {
+      "key": "hair_care",
+      "subtitle": "28 materials",
+      "class_ids": [
+        30,
+        31,
+        32,
+        33
+      ],
+      "display": {
+        "30": "DUMMY SUNSILK RELAUNCH BLACK 5PLUS1 FESTOON PHASE1 AUG26",
+        "31": "DUMMY SUNSILK RELAUNCH BLACK 5PLUS1 BUNTING PHASE1 AUG26",
+        "32": "DUMMY SUNSILK RELAUNCH BLACK 5PLUS1 POSTER PHASE1 AUG26",
+        "33": "DUMMY SUNSILK RELAUNCH SMOOTH BUNTING PHASE1 AUG26"
+      },
+      "missing_from_model": [
+        "clear_men_csm_bunting_jul26",
+        "clear_men_sachet_hanger_jul26",
+        "dove_conditioner_sachet_hanger_jan26",
+        "haircare_shelftalker_bottom",
+        "haircare_shelftalker_left",
+        "haircare_shelftalker_right",
+        "haircare_shelftalker_top",
+        "sunsilk_5_plus_1_poster_may26",
+        "sunsilk_triple_sachet_poster_jan26"
+      ],
+      "unmapped_model_classes": []
+    },
+    {
+      "key": "home_and_hygiene",
+      "subtitle": "24 materials",
+      "class_ids": [
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47
+      ],
+      "display": {
+        "38": "DUMMY VIM RELAUNCH BUNTING AUG26",
+        "39": "DUMMY VIM RELAUNCH POSTER AUG26",
+        "40": "DUMMY VIM RELAUNCH PRICEBOARD AUG26",
+        "41": "DUMMY VIM RELAUNCH SHELF STRIP AUG26",
+        "42": "DUMMY VIM RELAUNCH SHELF TALKER AUG26",
+        "43": "DUMMY VIM RELAUNCH SHELF TALKER AUG26",
+        "44": "DUMMY VIM RELAUNCH SHELF TALKER AUG26",
+        "45": "DUMMY VIM RELAUNCH SHELF TALKER AUG26",
+        "46": "DUMMY VIM RELAUNCH SHUTTER PILLAR STICKER AUG26",
+        "47": "DUMMY VIM RELAUNCH SUNSHADE BANNER AUG26"
+      },
+      "missing_from_model": [],
+      "unmapped_model_classes": []
+    },
+    {
+      "key": "mini_meals",
+      "subtitle": "2 materials",
+      "class_ids": [],
+      "display": {},
+      "missing_from_model": [
+        "knorr_soup_large_sticker_feb26"
+      ],
+      "unmapped_model_classes": []
+    },
+    {
+      "key": "nutrition",
+      "subtitle": "54 materials",
+      "class_ids": [
+        0,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "display": {
+        "0": "CHOCOLATE HORLICKS RELAUNCH POSTER AUG26",
+        "5": "DUMMY HORLICKS 10TK SACHET HANGER NOV26",
+        "6": "DUMMY HORLICKS 10TK SHUTTER PILLAR STICKER NOV26",
+        "7": "DUMMY HORLICKS 10TK SUNSHADE BANNER NOV26",
+        "8": "DUMMY HORLICKS BUNTING OCT26",
+        "9": "DUMMY HORLICKS PRICE BOARD OCT26",
+        "10": "DUMMY HORLICKS LARGE POSTER SEP26",
+        "11": "DUMMY HORLICKS SHOPFIN AUG26",
+        "12": "DUMMY HORLICKS 10TK SHUTTER PILLAR STICKER NOV26"
+      },
+      "missing_from_model": [
+        "glucomax_lemon_sunshade_banner_jun26",
+        "horlicks_jr",
+        "horlicks_lite",
+        "horlicks_std"
+      ],
+      "unmapped_model_classes": []
+    },
+    {
+      "key": "oral_care",
+      "subtitle": "28 materials",
+      "class_ids": [
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29
+      ],
+      "display": {
+        "21": "DUMMY ORAL CARE TOOTHPASTE SHELF TALKER OCT26",
+        "22": "DUMMY ORAL CARE TOOTHPASTE SHELF TALKER OCT26",
+        "23": "DUMMY ORAL CARE TOOTHPASTE SHELF TALKER OCT26",
+        "24": "DUMMY ORAL CARE TOOTHPASTE SHELF TALKER OCT26",
+        "25": "DUMMY PEPSODENT GUM EXPERT POSTER OCT26",
+        "26": "DUMMY PEPSODENT RELAUNCH LARGE HANGER OCT26",
+        "27": "DUMMY PEPSODENT RELAUNCH POSTER OCT26",
+        "28": "DUMMY PEPSODENT RELAUNCH SMALL HANGER OCT26",
+        "29": "DUMMY PEPSODENT RELAUNCH STICKER OCT26"
+      },
+      "missing_from_model": [
+        "closeup_lemon_salt_poster_jun26",
+        "da_toothpaste_st_bottom",
+        "da_toothpaste_st_left",
+        "da_toothpaste_st_right",
+        "da_toothpaste_st_top",
+        "pepsodent_advanced_salt_poster_jun26",
+        "pepsodent_germicheck_poster_feb26"
+      ],
+      "unmapped_model_classes": []
+    },
+    {
+      "key": "skin_care",
+      "subtitle": "42 materials",
+      "class_ids": [
+        35,
+        36,
+        37
+      ],
+      "display": {
+        "35": "DUMMY VASELINE GLUTA 70ML COUNTER TOP OCT26",
+        "36": "DUMMY VASELINE GLUTA 70ML POSTER OCT26",
+        "37": "DUMMY VASELINE GLUTA 70ML SMALL STICKER OCT26"
+      },
+      "missing_from_model": [
+        "gal_relaunch_bunting_jan26",
+        "gal_relaunch_poster_jan26",
+        "gal_relaunch_shelf_strip_feb26",
+        "gal_shelftalker_bottom",
+        "gal_shelftalker_left",
+        "gal_shelftalker_right",
+        "gal_shelftalker_top",
+        "gal_sun_dispenser_june26",
+        "ponds_hydration_fw_poster_june26",
+        "ponds_localisation_poster_feb26",
+        "ponds_localisation_sticker_feb26",
+        "ponds_shelftalker_bottom",
+        "ponds_shelftalker_left",
+        "ponds_shelftalker_right",
+        "ponds_shelftalker_top",
+        "sic_gal_sun_st_bottom",
+        "sic_gal_sun_st_left",
+        "sic_gal_sun_st_right",
+        "sic_gal_sun_st_top"
+      ],
+      "unmapped_model_classes": []
+    },
+    {
+      "key": "skin_cleansing",
+      "subtitle": "42 materials",
+      "class_ids": [
+        1,
+        2,
+        3,
+        4,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "display": {
+        "1": "DOVE & LUX INT QPDS SHELF TALKER SEP26",
+        "2": "DOVE & LUX INT QPDS SHELF TALKER SEP26",
+        "3": "DOVE & LUX INT QPDS SHELF TALKER SEP26",
+        "4": "DOVE & LUX INT QPDS SHELF TALKER SEP26",
+        "13": "DUMMY LIFEBUOY RELAUNCH BUNTING OCT26",
+        "14": "DUMMY LIFEBUOY RELAUNCH DANGLER OCT26",
+        "15": "DUMMY LIFEBUOY RELAUNCH POSTER OCT26",
+        "16": "DUMMY LUX BUNTING PHASE1 AUG26",
+        "17": "DUMMY LUX MODEL POSTER PHASE1 AUG26",
+        "18": "DUMMY LUX PRODUCT POSTER PHASE1 AUG26",
+        "19": "DUMMY LUX SHELF STRIP PHASE1 AUG26",
+        "20": "DUMMY LUX SHOPFIN PHASE1 AUG26"
+      },
+      "missing_from_model": [
+        "lux_bodywash",
+        "lux_int_st_bottom",
+        "lux_int_st_left",
+        "lux_int_st_right",
+        "lux_int_st_top"
+      ],
+      "unmapped_model_classes": []
+    }
+  ]
+}

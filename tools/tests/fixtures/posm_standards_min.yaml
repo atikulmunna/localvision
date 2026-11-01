@@ -1,0 +1,32 @@
+# Minimal stand-in for UBL-standalone's config/standards/posm_standards.yaml.
+#
+# The real file carries 238 active ai_class entries beside 128 commented-out
+# ones, and several standard names deliberately share one ai_class because the
+# model has a single class for a Jan and a Feb version of the same material.
+
+item_mappings:
+  # Two standard names, one model class. The model cannot tell them apart, so
+  # the catalog must collapse them to one class id.
+  Closeup LS Poster:
+    ai_class: closeup_ls_poster
+    category: oral_care
+  Closeup LS Poster Jan26:
+    ai_class: closeup_ls_poster
+    category: oral_care
+
+  Aloe Poster Festoon:
+    ai_class: aloe_poster_festoon
+    category: skin_care
+
+  # One standard, several model classes. A shelf talker is detected piece by
+  # piece (top, left, right, bottom), so 34 of the real file's 238 entries
+  # carry a list here rather than a single name.
+  PS GAL Rolling Sticker Feb26:
+    ai_class: [gal_shelftalker_bottom, gal_shelftalker_left]
+    category: skin_care
+
+# Commented out in the real file too, for materials not in the current wave.
+# These must not reach the catalog.
+#  Commented Only Poster:
+#    ai_class: commented_only
+#    category: oral_care

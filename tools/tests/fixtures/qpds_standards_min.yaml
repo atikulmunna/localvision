@@ -1,0 +1,70 @@
+# Minimal stand-in for UBL-standalone's config/standards/qpds_standards.yaml.
+# Same shape as the real file, cut down to the cases worth asserting on.
+#
+# The real file is the authority; this exists so the generator's behaviour can
+# be pinned without depending on whatever the live standards happen to say
+# this month.
+
+shelf_categories:
+  DOUBLE_SHELF: Nutrition
+  LITE: Nutrition
+  ALL_MISSING: Skin Care
+  SIZE_VARIANTS: Skin Care
+
+shelf_types:
+  # Every product resolvable, to pin the normal case.
+  DOUBLE_SHELF:
+    min_shelftalkers: 1
+    compliance_rules:
+      overall_threshold: 100.0
+    products:
+    - product: Standard Horlicks Jar
+      quantity: 24
+      order: 1
+    - product: Chocolate Horlicks Jar
+      quantity: 16
+      order: 2
+
+  # One product the model has, one it does not, to pin partial reconciliation.
+  LITE:
+    min_shelftalkers: 1
+    products:
+    - product: Horlicks Lite Jar
+      quantity: 6
+      order: 1
+    - product: Standard Horlicks Jar
+      quantity: 4
+      order: 2
+
+  # Nothing resolvable at all. A slab in this state can never label anything,
+  # which the picker has to be able to say out loud rather than just showing
+  # an empty camera.
+  ALL_MISSING:
+    min_shelftalkers: 0
+    products:
+    - product: Horlicks Lite Jar
+      quantity: 2
+      order: 1
+
+  # Two products that are one model class in two sizes. The classifier cannot
+  # tell 50g from 100g; the server resolves size separately by geometry.
+  SIZE_VARIANTS:
+    min_shelftalkers: 0
+    products:
+    - product: Glow & Lovely Multi-Vitamin Cream 50g
+      quantity: 4
+      order: 1
+    - product: Glow & Lovely Multi-Vitamin Cream 100g
+      quantity: 2
+      order: 2
+
+# ai_class -> display name, the same direction the real file uses, which is
+# why the generator has to invert it.
+product_mappings:
+  "horlicks_std": "Standard Horlicks Jar"
+  "horlicks_choco": "Chocolate Horlicks Jar"
+  "horlicks_lite": "Horlicks Lite Jar"
+  # The real file carries keys of the form <ai_class>:<size>. The server takes
+  # the part before the colon as the model class (qpds_compliance.py:578).
+  "gl_mltvit_crm:50g": "Glow & Lovely Multi-Vitamin Cream 50g"
+  "gl_mltvit_crm:100g": "Glow & Lovely Multi-Vitamin Cream 100g"
