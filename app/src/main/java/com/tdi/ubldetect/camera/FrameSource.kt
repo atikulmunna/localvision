@@ -19,6 +19,7 @@ import com.tdi.ubldetect.imaging.YuvPlanes
 import com.tdi.ubldetect.imaging.YuvToRgb
 import java.nio.ByteBuffer
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -173,13 +174,39 @@ class FrameSource(
         if (!executor.isShutdown) executor.execute(block)
     }
 
+    /**
+     * Stops delivering frames and waits for the one in flight.
+     *
+     * The wait is the point. `shutdown()` only refuses new work; it returns
+     * immediately while a frame is still inside the analyzer. The caller
+     * closes the interpreters next, and those are native objects, so
+     * returning early here closed one out from under running native code and
+     * segfaulted the process (SIGSEGV in libtensorflowlite_jni.so on the
+     * analysis thread) every time someone left the camera screen.
+     *
+     * Unbinding first means at most one frame remains to wait for. The
+     * timeout is a backstop: at roughly 400 ms a frame, three seconds is
+     * many times the worst case, and giving up is still better than hanging
+     * the UI thread on teardown.
+     */
     fun stop() {
         provider?.unbindAll()
         executor.shutdown()
+        val finished = runCatching {
+            executor.awaitTermination(SHUTDOWN_WAIT_SECONDS, TimeUnit.SECONDS)
+        }.getOrDefault(false)
+        if (!finished) {
+            // Closing the models now risks the very crash this guards, so say
+            // so rather than failing silently.
+            Log.w(TAG, "analysis thread did not finish within ${SHUTDOWN_WAIT_SECONDS}s")
+        }
     }
 
     private companion object {
         const val TAG = "FrameSource"
+
+        /** Backstop for teardown; a frame costs roughly 400 ms. */
+        const val SHUTDOWN_WAIT_SECONDS = 3L
 
         /**
          * 1280x720, not 1920x1080.
