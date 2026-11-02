@@ -35,6 +35,19 @@ class OverlayView @JvmOverloads constructor(
     private var labeller: (Int) -> String = { "class $it" }
     private var status: String = ""
 
+    /**
+     * Shown instead of the timings until the models are ready.
+     *
+     * The camera binds in about 125 ms but a cold model load takes seconds,
+     * so without this the person watches a live preview draw no boxes and
+     * reasonably concludes the detector is broken.
+     */
+    var loadingMessage: String? = "Loading model"
+        set(value) {
+            field = value
+            invalidate()
+        }
+
     private val boxPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeWidth = dp(2.5f).toFloat()
@@ -123,15 +136,16 @@ class OverlayView @JvmOverloads constructor(
         // has to honour it explicitly. Without this it draws at y=0 and sits
         // on the system clock.
         val top = paddingTop.toFloat()
-        if (status.isNotEmpty()) {
+        val line = loadingMessage ?: status
+        if (line.isNotEmpty()) {
             // A pill rather than a full-width bar: it covers less of the
             // preview, which is the thing the person is actually looking at.
             val padH = dp(10f).toFloat()
-            val w = statusPaint.measureText(status)
+            val w = statusPaint.measureText(line)
             val left = paddingLeft + dp(12f).toFloat()
             scratch.set(left, top + dp(6f), left + w + padH * 2, top + dp(32f))
             canvas.drawRoundRect(scratch, dp(13f).toFloat(), dp(13f).toFloat(), statusBackPaint)
-            canvas.drawText(status, left + padH, top + dp(24f), statusPaint)
+            canvas.drawText(line, left + padH, top + dp(24f), statusPaint)
         }
 
         if (state.frozen) {

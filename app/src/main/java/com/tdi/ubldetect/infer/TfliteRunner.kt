@@ -3,6 +3,7 @@ package com.tdi.ubldetect.infer
 import android.content.Context
 import android.util.Log
 import java.io.Closeable
+import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -57,7 +58,10 @@ class TfliteRunner(
 
     init {
         if (!assetExists(context, assetPath)) throw ModelAssetMissing(assetPath)
+        val tMap = android.os.SystemClock.elapsedRealtime()
         val model = mapModel(context, assetPath)
+        val mapMs = android.os.SystemClock.elapsedRealtime() - tMap
+        val tBuild = android.os.SystemClock.elapsedRealtime()
 
         var delegate: GpuDelegate? = null
         var chosen = DelegateKind.CPU_XNNPACK
@@ -66,6 +70,18 @@ class TfliteRunner(
         if (preferred == DelegateKind.GPU && runCatching(gpuProbe).getOrDefault(false)) {
             built = runCatching {
                 val compat = CompatibilityList()
+                // Deliberately NOT setSerializationParams. Caching the
+                // compiled kernels sounds free, but it makes delegate
+                // application all-or-nothing, and this model has ops the GPU
+                // delegate cannot take (DIV, FLOOR_MOD, GATHER, NOT_EQUAL,
+                // RESHAPE, SELECT, SIGN: the NMS-free head's selection
+                // arithmetic). Normally those stay on CPU and the rest runs
+                // on GPU; with serialization on, the whole delegate failed
+                // and silently fell back to CPU.
+                //
+                // It bought nothing anyway: measured on this device a cold
+                // load is about 3.5s on GPU and 3.6s on CPU, so kernel
+                // compilation is not where the time goes.
                 delegate = GpuDelegate(compat.bestOptionsForThisDevice)
                 Interpreter(model, Interpreter.Options().addDelegate(delegate))
             }.onFailure {
@@ -86,6 +102,11 @@ class TfliteRunner(
         interpreter = built
         gpuDelegate = delegate
         activeDelegate = chosen
+        Log.i(
+            TAG,
+            "$assetPath: map ${mapMs}ms, interpreter " +
+                "${android.os.SystemClock.elapsedRealtime() - tBuild}ms, on $chosen",
+        )
     }
 
     fun inputShape(): IntArray = interpreter.getInputTensor(0).shape()
@@ -131,6 +152,9 @@ class TfliteRunner(
     companion object {
         private const val TAG = "TfliteRunner"
         private const val CPU_THREADS = 4
+
+        /** Where compiled GPU kernels are cached, keyed per model file. */
+        private const val GPU_CACHE_DIR = "tflite-gpu"
 
         /**
          * Whether a model file is bundled, without loading it.

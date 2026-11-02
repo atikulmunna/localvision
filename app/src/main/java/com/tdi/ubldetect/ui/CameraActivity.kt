@@ -163,6 +163,7 @@ class CameraActivity : ComponentActivity() {
      * @return false when a model for this state is not bundled
      */
     private fun buildPipeline(s: ControlsState): Boolean {
+        val startedAt = android.os.SystemClock.elapsedRealtime()
         val assets = when (mode) {
             Mode.POSM -> listOf(s.assetFor("posm"))
             Mode.QPDS -> listOf(s.assetFor("qpds_seg"), "models/qpds_cls_224.tflite")
@@ -192,6 +193,11 @@ class CameraActivity : ComponentActivity() {
             Mode.POSM -> PosmPipeline(opened[0], entry)
             Mode.QPDS -> QpdsPipeline(opened[0], ClsRunner(opened[1]), entry)
         }
+        val loadMs = android.os.SystemClock.elapsedRealtime() - startedAt
+        android.util.Log.i(
+            "CameraActivity",
+            "models ready in ${loadMs}ms (${mode.name} ${s.imgsz} ${opened[0].activeDelegate})",
+        )
         toast("${mode.name} ${s.imgsz} on ${opened[0].activeDelegate}")
         return true
     }
@@ -236,7 +242,10 @@ class CameraActivity : ComponentActivity() {
         source.start()
 
         source.post {
-            if (!buildPipeline(state)) runOnUiThread { finish() }
+            val ok = buildPipeline(state)
+            runOnUiThread {
+                if (ok) overlayView.loadingMessage = null else finish()
+            }
         }
     }
 
