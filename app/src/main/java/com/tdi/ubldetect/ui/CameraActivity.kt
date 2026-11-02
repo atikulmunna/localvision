@@ -196,17 +196,27 @@ class CameraActivity : ComponentActivity() {
         return true
     }
 
+    /**
+     * Shows the preview first, loads the models second.
+     *
+     * Loading is not quick: a 57 MB model is memory mapped and the GPU
+     * delegate is initialised, and QPDS does that twice. Doing it before
+     * starting the camera left the screen blank for a second or two after
+     * tapping a category, which reads as the app hanging.
+     *
+     * So the camera binds immediately and the load is posted to the analysis
+     * thread. Frames that arrive before it finishes find no pipeline and are
+     * dropped, which costs a few early frames and nothing else. The same
+     * thread later runs inference, so the load cannot overlap a frame.
+     */
     private fun startCamera() {
-        if (!buildPipeline(state)) {
-            finish()
-            return
-        }
-
         val source = FrameSource(this, this, previewView) { frame, timestampNs, convertMs ->
             // Threshold is read per frame, so the slider takes effect on the
             // next frame without touching the interpreter.
             val s = state
+            // Null until the models finish loading; those frames are dropped.
             val result = pipeline?.process(frame, timestampNs, s, mapOf("yuv" to convertMs))
+                ?: return@FrameSource
             lastFrame = frame
             lastResult = result
             runOnUiThread {
@@ -224,6 +234,10 @@ class CameraActivity : ComponentActivity() {
         }
         frameSource = source
         source.start()
+
+        source.post {
+            if (!buildPipeline(state)) runOnUiThread { finish() }
+        }
     }
 
     /** Safe to call from the analysis thread as well as the UI thread. */

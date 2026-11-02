@@ -37,7 +37,7 @@
 
     <application
         android:allowBackup="false"
-        android:label="UBL Detect Viewer"
+        android:label="localVision"
         android:supportsRtl="true"
         android:theme="@style/Theme.UblDetect">
 
@@ -54,7 +54,8 @@
         <activity
             android:name=".ui.CameraActivity"
             android:exported="false"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.UblDetect.Camera" />
     </application>
 
 </manifest>

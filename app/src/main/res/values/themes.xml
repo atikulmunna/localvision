@@ -1,4 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.UblDetect" parent="android:Theme.Material.NoActionBar" />
+    <!-- The picker: light, read in hand. -->
+    <style name="Theme.UblDetect" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/surface</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <!-- Dark status-bar icons, because the bar sits over a light surface. -->
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+
+    <!--
+      The camera: black behind a full-bleed preview, light system icons.
+      Not a style choice; chrome here has to stay readable over both a white
+      poster and a dark shelf.
+    -->
+    <style name="Theme.UblDetect.Camera" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
 </resources>

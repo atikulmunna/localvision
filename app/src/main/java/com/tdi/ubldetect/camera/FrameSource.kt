@@ -88,15 +88,35 @@ class FrameSource(
         )
         .build()
 
+    /**
+     * Asks for a full HD preview.
+     *
+     * Without this CameraX picks a preview resolution on its own, and when
+     * another use case is bound it tends to choose conservatively, which is
+     * why the preview looked softer than the phone's own camera app. The
+     * analysis stream stays at [ANALYSIS_TARGET]; they are separate streams
+     * and only the analysis one is paid for per frame in Kotlin.
+     */
+    private fun previewResolution(): ResolutionSelector = ResolutionSelector.Builder()
+        .setAspectRatioStrategy(AspectRatioStrategy.RATIO_16_9_FALLBACK_AUTO_STRATEGY)
+        .setResolutionStrategy(
+            ResolutionStrategy(
+                PREVIEW_TARGET,
+                ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER,
+            ),
+        )
+        .build()
+
     fun start() {
         val future = ProcessCameraProvider.getInstance(context)
         future.addListener({
             val cameraProvider = future.get()
             provider = cameraProvider
 
-            val preview = Preview.Builder().build().also {
-                it.surfaceProvider = previewView.surfaceProvider
-            }
+            val preview = Preview.Builder()
+                .setResolutionSelector(previewResolution())
+                .build()
+                .also { it.surfaceProvider = previewView.surfaceProvider }
 
             val analysis = ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
@@ -219,5 +239,13 @@ class FrameSource(
          * way down to 640. Measure before raising it further.
          */
         val ANALYSIS_TARGET = Size(1280, 720)
+
+        /**
+         * What the person sees. Higher than the analysis stream on purpose:
+         * the preview is composited by the display pipeline and costs us
+         * nothing per frame, while every analysis pixel is converted in
+         * Kotlin on the way to the model.
+         */
+        val PREVIEW_TARGET = Size(1920, 1080)
     }
 }

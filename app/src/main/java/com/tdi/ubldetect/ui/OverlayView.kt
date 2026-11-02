@@ -7,6 +7,7 @@ import android.graphics.Paint
 import android.graphics.RectF as AndroidRectF
 import android.util.AttributeSet
 import android.view.View
+import com.tdi.ubldetect.R
 import com.tdi.ubldetect.imaging.PreviewMapping
 import com.tdi.ubldetect.imaging.ViewMapping
 import com.tdi.ubldetect.model.FrameResult
@@ -36,23 +37,28 @@ class OverlayView @JvmOverloads constructor(
 
     private val boxPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
-        strokeWidth = 4f
-        color = Color.rgb(0, 229, 160)
+        strokeWidth = dp(2.5f).toFloat()
+        color = context.color(R.color.accent_bright)
     }
     private val labelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.BLACK
-        textSize = 34f
+        textSize = context.sp(13f)
         isFakeBoldText = true
     }
     private val labelBackPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.rgb(0, 229, 160)
+        color = context.color(R.color.accent_bright)
     }
     private val statusPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.WHITE
-        textSize = 30f
+        color = context.color(R.color.chrome_text)
+        textSize = context.sp(12f)
     }
     private val statusBackPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.argb(150, 0, 0, 0)
+        color = context.color(R.color.chrome)
+    }
+    private val holdPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = context.color(R.color.accent_bright)
+        textSize = context.sp(12f)
+        isFakeBoldText = true
     }
 
     private val scratch = AndroidRectF()
@@ -95,25 +101,47 @@ class OverlayView @JvmOverloads constructor(
             canvas.drawRect(scratch, boxPaint)
 
             val text = "${labeller(d.classId)}  ${(d.score * 100).toInt()}%"
+            val padH = dp(6f).toFloat()
             val w = labelPaint.measureText(text)
+            val tall = dp(19f).toFloat()
             // Above the box, or inside it when the box is against the top edge.
-            val baseline = if (r.top > 40f) r.top - 10f else r.top + 36f
-            canvas.drawRect(r.left, baseline - 30f, r.left + w + 16f, baseline + 8f, labelBackPaint)
-            canvas.drawText(text, r.left + 8f, baseline, labelPaint)
+            val baseline = if (r.top > tall + dp(4f)) r.top - dp(5f) else r.top + tall + dp(3f)
+            // Clamped so a long name on a box near the right edge stays on
+            // screen instead of running off it, which is where labels went
+            // before: readable only up to "...PHASE1 AU".
+            val left = (r.left).coerceIn(0f, (width - w - padH * 2).coerceAtLeast(0f))
+            scratch.set(left, baseline - tall, left + w + padH * 2, baseline + dp(5f))
+            canvas.drawRoundRect(scratch, dp(4f).toFloat(), dp(4f).toFloat(), labelBackPaint)
+            canvas.drawText(text, left + padH, baseline, labelPaint)
         }
 
         // Padding does not move the canvas, it only reserves space, so the
         // status line has to honour it explicitly. Without this it draws at
         // y=0 and sits on top of the system clock, which is exactly the
         // overlap this app already had once.
+        // Padding reserves space but does not move the canvas, so the chrome
+        // has to honour it explicitly. Without this it draws at y=0 and sits
+        // on the system clock.
         val top = paddingTop.toFloat()
         if (status.isNotEmpty()) {
-            canvas.drawRect(0f, top, width.toFloat(), top + 44f, statusBackPaint)
-            canvas.drawText(status, paddingLeft + 16f, top + 32f, statusPaint)
+            // A pill rather than a full-width bar: it covers less of the
+            // preview, which is the thing the person is actually looking at.
+            val padH = dp(10f).toFloat()
+            val w = statusPaint.measureText(status)
+            val left = paddingLeft + dp(12f).toFloat()
+            scratch.set(left, top + dp(6f), left + w + padH * 2, top + dp(32f))
+            canvas.drawRoundRect(scratch, dp(13f).toFloat(), dp(13f).toFloat(), statusBackPaint)
+            canvas.drawText(status, left + padH, top + dp(24f), statusPaint)
         }
 
         if (state.frozen) {
-            canvas.drawText("FROZEN", width - paddingRight - 140f, top + 32f, statusPaint)
+            val label = "HOLD"
+            val padH = dp(10f).toFloat()
+            val w = holdPaint.measureText(label)
+            val right = width - paddingRight - dp(12f).toFloat()
+            scratch.set(right - w - padH * 2, top + dp(6f), right, top + dp(32f))
+            canvas.drawRoundRect(scratch, dp(13f).toFloat(), dp(13f).toFloat(), statusBackPaint)
+            canvas.drawText(label, right - w - padH, top + dp(24f), holdPaint)
         }
     }
 }

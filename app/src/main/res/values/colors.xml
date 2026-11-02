@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Two surfaces, on purpose.
+
+  The picker is light: it is read in hand, often indoors, and a light sheet
+  of cards is easier to scan than grey-on-grey.
+
+  The camera chrome stays dark and translucent. That is legibility, not
+  taste: it sits over a live preview that swings between a white poster and
+  a dark shelf, and light chrome disappears against the first and glares in
+  a shop's lighting.
+
+  One accent carries across both so they read as the same app. It is the
+  same green the detection boxes use, in two tones: a deeper one that holds
+  up on white, a brighter one for over the camera.
+-->
+<resources>
+    <!-- Picker, light -->
+    <color name="surface">#FFFAFAFA</color>
+    <color name="card">#FFFFFFFF</color>
+    <color name="card_border">#FFE4E7EC</color>
+    <color name="text_primary">#FF111827</color>
+    <color name="text_secondary">#FF6B7280</color>
+    <color name="text_disabled">#FF9CA3AF</color>
+    <color name="card_disabled">#FFF3F4F6</color>
+
+    <!-- States, from the catalog's reconciliation -->
+    <color name="warn_text">#FFB45309</color>
+    <color name="warn_surface">#FFFFFBEB</color>
+
+    <!-- Accent -->
+    <color name="accent">#FF00A37A</color>
+    <color name="accent_bright">#FF00E5A0</color>
+
+    <!-- Camera chrome, dark -->
+    <color name="chrome">#B3000000</color>
+    <color name="chrome_text">#FFFFFFFF</color>
+    <color name="chip">#33FFFFFF</color>
+    <color name="chip_active">#FF00A37A</color>
+</resources>
