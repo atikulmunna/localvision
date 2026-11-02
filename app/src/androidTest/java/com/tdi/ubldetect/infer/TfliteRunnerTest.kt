@@ -34,6 +34,20 @@ class TfliteRunnerTest {
         }
 
     @Test
+    fun closingTwiceReleasesOnceAndDoesNotCrash() {
+        // Two paths can both believe they own the release: the activity
+        // tearing down and a model swap replacing the runner. Interpreter
+        // tolerates a second close, but GpuDelegate frees a native handle
+        // and freeing it twice is undefined.
+        val before = TfliteRunner.live.get()
+        val r = TfliteRunner(ctx, "models/posm_640.tflite", DelegateKind.CPU_XNNPACK)
+        assertEquals(before + 1, TfliteRunner.live.get())
+        r.close()
+        r.close()
+        assertEquals(before, TfliteRunner.live.get())
+    }
+
+    @Test
     fun loadsPosmModelAndReportsContractShapes() {
         TfliteRunner(ctx, "models/posm_960.tflite", DelegateKind.CPU_XNNPACK).use { r ->
             assertEquals(960, r.inputSize)

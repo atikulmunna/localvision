@@ -3,6 +3,7 @@ package com.tdi.ubldetect.ui
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -42,7 +43,19 @@ class CameraActivity : ComponentActivity() {
     private lateinit var catalog: Catalog
 
     private var frameSource: FrameSource? = null
+
+    /**
+     * Written on the analysis thread, read on the UI thread at teardown.
+     *
+     * Volatile because [onDestroy] has no other happens-before edge to the
+     * loading thread once [FrameSource.stop]'s wait expires. Without it the
+     * UI thread could see a stale list and close interpreters the analysis
+     * thread had already replaced.
+     */
+    @Volatile
     private var runners: List<TfliteRunner> = emptyList()
+
+    @Volatile
     private var pipeline: FramePipeline? = null
     private lateinit var mode: Mode
 
@@ -181,10 +194,26 @@ class CameraActivity : ComponentActivity() {
         runners.forEach { it.close() }
         runners = emptyList()
 
-        val opened = try {
-            assets.map { TfliteRunner(this, it, s.delegate) }
-        } catch (e: ModelAssetMissing) {
-            toast("Model not bundled: ${e.assetPath}")
+        // Opened into a local list so a failure part way through can close
+        // what did open. QPDS opens two, and leaving the segmenter behind
+        // when the classifier fails costs 57 MB for the session.
+        val opened = mutableListOf<TfliteRunner>()
+        try {
+            for (asset in assets) opened += TfliteRunner(this, asset, s.delegate)
+        } catch (e: Exception) {
+            // Not only ModelAssetMissing. `FileChannel.map` raises
+            // IOException and the XNNPACK interpreter raises
+            // IllegalArgumentException, and letting either escape from here
+            // left the old models already closed, no pipeline, no message,
+            // and a live preview that never detected anything again.
+            opened.forEach { it.close() }
+            Log.e(TAG, "could not open models for ${s.imgsz}", e)
+            toast(
+                when (e) {
+                    is ModelAssetMissing -> "Model not bundled: ${e.assetPath}"
+                    else -> "Could not load model: ${e.message ?: e.javaClass.simpleName}"
+                },
+            )
             return false
         }
         runners = opened
@@ -194,8 +223,8 @@ class CameraActivity : ComponentActivity() {
             Mode.QPDS -> QpdsPipeline(opened[0], ClsRunner(opened[1]), entry)
         }
         val loadMs = android.os.SystemClock.elapsedRealtime() - startedAt
-        android.util.Log.i(
-            "CameraActivity",
+        Log.i(
+            TAG,
             "models ready in ${loadMs}ms (${mode.name} ${s.imgsz} ${opened[0].activeDelegate})",
         )
         toast("${mode.name} ${s.imgsz} on ${opened[0].activeDelegate}")
@@ -266,12 +295,23 @@ class CameraActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        frameSource?.stop()
+        // Handed to the analysis thread rather than done here, so the close
+        // queues behind any frame or model load still running. Doing it on
+        // this thread raced both.
+        val source = frameSource
+        if (source != null) source.stop(::releaseModels) else releaseModels()
+    }
+
+    /** Runs on the analysis thread, the only thread that opens these. */
+    private fun releaseModels() {
+        pipeline = null
         runners.forEach { it.close() }
+        runners = emptyList()
     }
 
     companion object {
         const val EXTRA_MODE = "mode"
         const val EXTRA_KEY = "key"
+        private const val TAG = "CameraActivity"
     }
 }

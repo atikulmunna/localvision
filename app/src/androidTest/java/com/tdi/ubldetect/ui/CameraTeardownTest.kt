@@ -2,11 +2,17 @@ package com.tdi.ubldetect.ui
 
 import android.Manifest
 import android.content.Intent
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.tdi.ubldetect.catalog.Mode
+import com.tdi.ubldetect.infer.TfliteRunner
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -68,5 +74,70 @@ class CameraTeardownTest {
         // The other end of the race: tearing down while the camera is still
         // binding and no frame has arrived yet.
         repeat(3) { openThenClose(Mode.POSM, "hair_care", 150) }
+    }
+
+    /**
+     * Leaving during a model swap must still release the models.
+     *
+     * The teardown wait was sized for a frame, at "roughly 400 ms", but model
+     * loads run on the same single thread and cost about 3.5 s each, so QPDS
+     * spends some 7 s loading two. Tap a resolution and press back inside
+     * that window and the wait expires with the load still running. The
+     * activity then closes a list of runners that the loading thread has not
+     * filled in yet, so both new interpreters stay open for the life of the
+     * process, and if the timing lands the other way it closes one the
+     * loading thread is still using.
+     *
+     * The existing tests cannot see this: none of them swaps, and a leak
+     * raises nothing.
+     */
+    @Test
+    fun leavingDuringAResolutionSwapReleasesEveryInterpreter() {
+        repeat(2) {
+            ActivityScenario.launch<CameraActivity>(
+                cameraIntent(Mode.QPDS, "DOVE_LUX_INTERNATIONAL"),
+            ).use { scenario ->
+                // The first load has to finish, or the swap is a no-op.
+                Thread.sleep(SWAP_SETTLE_MS)
+                scenario.onActivity { activity ->
+                    val chip = findByText(activity.window.decorView, "960")
+                    assertNotNull("no 960 chip in the controls panel", chip)
+                    chip!!.performClick()
+                }
+                // Mid-swap: two interpreters are opening on the analysis
+                // thread and the activity is about to go away under them.
+                Thread.sleep(300)
+            }
+            // Release is queued behind the load, so it completes after
+            // onDestroy returns rather than inside it.
+            waitForNoLiveInterpreters()
+            assertEquals("interpreters left open after teardown", 0, TfliteRunner.live.get())
+        }
+    }
+
+    private fun waitForNoLiveInterpreters() {
+        val deadline = System.currentTimeMillis() + RELEASE_WAIT_MS
+        while (TfliteRunner.live.get() != 0 && System.currentTimeMillis() < deadline) {
+            Thread.sleep(100)
+        }
+    }
+
+    /** The controls are built in code with no ids, so the label is the handle. */
+    private fun findByText(root: View, text: String): View? {
+        if (root is TextView && root.text == text) return root
+        if (root is ViewGroup) {
+            for (i in 0 until root.childCount) {
+                findByText(root.getChildAt(i), text)?.let { return it }
+            }
+        }
+        return null
+    }
+
+    private companion object {
+        /** Long enough for QPDS to finish opening both models. */
+        const val SWAP_SETTLE_MS = 9000L
+
+        /** Generous: the release it is waiting on is behind a 3.5 s load. */
+        const val RELEASE_WAIT_MS = 15000L
     }
 }

@@ -9,6 +9,7 @@ import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.channels.FileChannel
+import java.util.concurrent.atomic.AtomicInteger
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.gpu.CompatibilityList
 import org.tensorflow.lite.gpu.GpuDelegate
@@ -55,6 +56,7 @@ class TfliteRunner(
     val activeDelegate: DelegateKind
     private val interpreter: Interpreter
     private val gpuDelegate: GpuDelegate?
+    private var closed = false
 
     init {
         if (!assetExists(context, assetPath)) throw ModelAssetMissing(assetPath)
@@ -102,6 +104,7 @@ class TfliteRunner(
         interpreter = built
         gpuDelegate = delegate
         activeDelegate = chosen
+        live.incrementAndGet()
         Log.i(
             TAG,
             "$assetPath: map ${mapMs}ms, interpreter " +
@@ -144,14 +147,40 @@ class TfliteRunner(
         }
     }
 
+    /**
+     * Releases the native objects, once.
+     *
+     * The guard is not belt and braces. Two paths can both believe they own
+     * the release: the activity tearing down and a model swap replacing this
+     * runner. `Interpreter.close()` tolerates being called twice, but
+     * `GpuDelegate.close()` frees a native handle and a second free is
+     * undefined.
+     */
     override fun close() {
+        synchronized(this) {
+            if (closed) return
+            closed = true
+        }
         interpreter.close()
         gpuDelegate?.close()
+        live.decrementAndGet()
     }
 
     companion object {
         private const val TAG = "TfliteRunner"
         private const val CPU_THREADS = 4
+
+        /**
+         * Interpreters currently open, so a test can prove teardown released
+         * them.
+         *
+         * Leaking one is otherwise invisible: nothing crashes, the screen
+         * looks right, and the only symptom is 57 MB of mapped model and a
+         * native interpreter staying resident for the life of the process.
+         * That is exactly the outcome of losing a teardown race, so it needs
+         * to be assertable rather than inferred from a memory graph.
+         */
+        val live = AtomicInteger()
 
         /** Where compiled GPU kernels are cached, keyed per model file. */
         private const val GPU_CACHE_DIR = "tflite-gpu"

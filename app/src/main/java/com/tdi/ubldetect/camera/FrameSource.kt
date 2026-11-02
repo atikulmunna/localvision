@@ -195,37 +195,56 @@ class FrameSource(
     }
 
     /**
-     * Stops delivering frames and waits for the one in flight.
+     * Stops delivering frames and releases the models on the analysis thread.
      *
-     * The wait is the point. `shutdown()` only refuses new work; it returns
-     * immediately while a frame is still inside the analyzer. The caller
-     * closes the interpreters next, and those are native objects, so
-     * returning early here closed one out from under running native code and
-     * segfaulted the process (SIGSEGV in libtensorflowlite_jni.so on the
-     * analysis thread) every time someone left the camera screen.
+     * [releaseModels] is queued rather than run by the caller, and that is
+     * what makes teardown safe. `shutdown()` only refuses new work; it
+     * returns while a frame is still inside the analyzer, and closing an
+     * interpreter out from under running native code segfaulted the process
+     * (SIGSEGV in libtensorflowlite_jni.so) every time someone left the
+     * camera screen.
      *
-     * Unbinding first means at most one frame remains to wait for. The
-     * timeout is a backstop: at roughly 400 ms a frame, three seconds is
-     * many times the worst case, and giving up is still better than hanging
-     * the UI thread on teardown.
+     * Waiting was the first fix, and it was not enough. The wait was sized
+     * for a frame, at roughly 400 ms, but [post] puts model loads on this
+     * same thread and each one costs about 3.5 s, so QPDS spends some 7 s
+     * opening two. Leaving during a swap outlasted any wait short enough to
+     * keep off an ANR, and the activity then closed a runner list the
+     * loading thread had not filled in yet: both new interpreters stayed
+     * open for the life of the process.
+     *
+     * Queueing removes the race instead of outrunning it. The release sits
+     * behind whatever is already on this thread, so it cannot overlap a
+     * frame or a load, whether or not the wait below expires.
+     *
+     * The wait is now only politeness: it keeps the usual case finished by
+     * the time the activity is gone. Expiring is no longer a hazard, because
+     * nothing the caller does afterwards touches the models.
      */
-    fun stop() {
+    fun stop(releaseModels: () -> Unit = {}) {
         provider?.unbindAll()
+        // A second stop() would re-queue the release; the executor refuses it
+        // once shut down, and TfliteRunner.close() is idempotent regardless.
+        if (!executor.isShutdown) executor.execute(releaseModels)
         executor.shutdown()
         val finished = runCatching {
             executor.awaitTermination(SHUTDOWN_WAIT_SECONDS, TimeUnit.SECONDS)
         }.getOrDefault(false)
         if (!finished) {
-            // Closing the models now risks the very crash this guards, so say
-            // so rather than failing silently.
-            Log.w(TAG, "analysis thread did not finish within ${SHUTDOWN_WAIT_SECONDS}s")
+            Log.i(TAG, "models still releasing after ${SHUTDOWN_WAIT_SECONDS}s")
         }
     }
 
     private companion object {
         const val TAG = "FrameSource"
 
-        /** Backstop for teardown; a frame costs roughly 400 ms. */
+        /**
+         * How long teardown waits for the analysis thread to drain.
+         *
+         * A frame costs roughly 400 ms, so this covers one comfortably. It
+         * deliberately does not cover a model load: that would be 7 s on the
+         * UI thread, well past the ANR limit, and the release no longer needs
+         * the wait in order to be correct.
+         */
         const val SHUTDOWN_WAIT_SECONDS = 3L
 
         /**
