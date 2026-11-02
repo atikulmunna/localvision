@@ -235,7 +235,7 @@ class CameraActivity : ComponentActivity() {
                         overlayView.width,
                         overlayView.height,
                     ),
-                ) { classId -> catalog.labelFor(entry, classId) }
+                ) { classId -> catalog.labelFor(mode, entry, classId) }
             }
         }
         frameSource = source
@@ -260,7 +260,7 @@ class CameraActivity : ComponentActivity() {
             Toast.makeText(this, "Nothing captured yet", Toast.LENGTH_SHORT).show()
             return
         }
-        val file = FrameSaver(this).save(frame, lastResult) { catalog.labelFor(entry, it) }
+        val file = FrameSaver(this).save(frame, lastResult) { catalog.labelFor(mode, entry, it) }
         Toast.makeText(this, "Saved ${file.name}", Toast.LENGTH_SHORT).show()
     }
 

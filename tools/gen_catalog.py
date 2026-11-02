@@ -208,10 +208,25 @@ def build_catalog(
     posm_names: Path,
     qpds_cls_names: Path | None,
 ) -> dict:
-    """The whole catalog: every slab and every POSM category."""
+    """The whole catalog: every slab, every POSM category, every class name.
+
+    `model_classes` carries the exported models' own class names, for classes
+    no entry expects. With the allowlist off the app deliberately shows those
+    classes, and without their names it printed "class 12" and "class 54" at
+    100% confidence: the model being right and the app unable to say so.
+    """
+    model_classes = {
+        "posm": json.loads(posm_names.read_text(encoding="utf-8")),
+    }
+    if qpds_cls_names is not None:
+        model_classes["qpds_cls"] = json.loads(
+            qpds_cls_names.read_text(encoding="utf-8"),
+        )
+
     return {
         "qpds_slabs": _qpds_slabs(qpds_yaml, qpds_cls_names),
         "posm_categories": _posm_categories(posm_yaml, posm_names),
+        "model_classes": model_classes,
     }
 
 

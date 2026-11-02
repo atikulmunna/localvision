@@ -41,11 +41,21 @@ data class CatalogEntry(
 private data class CatalogDto(
     @SerialName("qpds_slabs") val qpdsSlabs: List<CatalogEntry> = emptyList(),
     @SerialName("posm_categories") val posmCategories: List<CatalogEntry> = emptyList(),
+    @SerialName("model_classes") val modelClasses: Map<String, Map<String, String>> = emptyMap(),
 )
 
 class Catalog(
     val qpdsSlabs: List<CatalogEntry>,
     val posmCategories: List<CatalogEntry>,
+    /**
+     * The exported models' own class names, keyed by model family.
+     *
+     * Needed for classes no entry expects. With the allowlist off the app
+     * deliberately shows those, and without these the screen read
+     * "class 41  100%" while the model had correctly identified a Dove hair
+     * mask: the right answer, unreadable.
+     */
+    private val modelClasses: Map<String, Map<String, String>> = emptyMap(),
 ) {
     fun entries(mode: Mode): List<CatalogEntry> = when (mode) {
         Mode.QPDS -> qpdsSlabs
@@ -53,21 +63,34 @@ class Catalog(
     }
 
     /**
-     * Label for a detected class within one entry.
+     * Label for a detected class, best name first.
      *
-     * Falls back to the raw index rather than hiding the detection: with the
-     * allowlist toggled off the app deliberately draws classes the chosen
-     * entry never expected, and "class 41" is more useful than a blank.
+     * Three tiers, in order:
+     *
+     * 1. the entry's own display name, which is what a person calls it
+     * 2. the model's class name, for classes outside the chosen entry, which
+     *    is what the allowlist toggle exists to show
+     * 3. the raw index, which means neither the catalog nor the model has a
+     *    name for it, and is still better than hiding the detection
      */
-    fun labelFor(entry: CatalogEntry, classId: Int): String =
-        entry.display[classId.toString()] ?: "class $classId"
+    fun labelFor(mode: Mode, entry: CatalogEntry, classId: Int): String {
+        val key = classId.toString()
+        entry.display[key]?.let { return it }
+        modelClasses[modelFamily(mode)]?.get(key)?.let { return it }
+        return "class $classId"
+    }
+
+    private fun modelFamily(mode: Mode): String = when (mode) {
+        Mode.POSM -> "posm"
+        Mode.QPDS -> "qpds_cls"
+    }
 
     companion object {
         private val json = Json { ignoreUnknownKeys = true }
 
         fun parse(text: String): Catalog {
             val dto = json.decodeFromString(CatalogDto.serializer(), text)
-            return Catalog(dto.qpdsSlabs, dto.posmCategories)
+            return Catalog(dto.qpdsSlabs, dto.posmCategories, dto.modelClasses)
         }
     }
 }

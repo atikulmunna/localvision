@@ -27,17 +27,39 @@ class CatalogTest {
     }
 
     @Test
-    fun labelForKnownClassIdReturnsDisplayName() {
+    fun labelForClassIdOutsideTheEntryUsesTheModelsOwnName() {
+        // With the allowlist off the app draws classes the chosen slab never
+        // expected. Falling back to the bare index meant the screen read
+        // "class 41  100%" while the model had correctly identified a Dove
+        // hair mask: right answer, unreadable.
         val c = Catalog.parse(fixture("catalog_min.json"))
-        assertEquals("Standard Horlicks Jar", c.labelFor(c.entries(Mode.QPDS)[0], 3))
+        assertEquals("dove_mask_25", c.labelFor(Mode.QPDS, c.entries(Mode.QPDS)[0], 41))
     }
 
     @Test
-    fun labelForClassIdOutsideTheEntryFallsBackToTheRawIndex() {
-        // With the allowlist toggled off the app draws classes the chosen slab
-        // never expected, and they still need something on the label.
+    fun theEntrysOwnDisplayNameWinsOverTheModelsClassName() {
+        // Within the chosen slab the human-facing name is better than the
+        // model's internal one.
         val c = Catalog.parse(fixture("catalog_min.json"))
-        assertEquals("class 41", c.labelFor(c.entries(Mode.QPDS)[0], 41))
+        assertEquals(
+            "Standard Horlicks Jar",
+            c.labelFor(Mode.QPDS, c.entries(Mode.QPDS)[0], 3),
+        )
+    }
+
+    @Test
+    fun eachModeLooksUpItsOwnModelsClassNames() {
+        // POSM class 41 and QPDS class 41 are different things entirely, so
+        // the fallback has to know which model produced the detection.
+        val c = Catalog.parse(fixture("catalog_min.json"))
+        assertEquals("ps_gal_sticker", c.labelFor(Mode.POSM, c.entries(Mode.POSM)[0], 41))
+        assertEquals("dove_mask_25", c.labelFor(Mode.QPDS, c.entries(Mode.QPDS)[0], 41))
+    }
+
+    @Test
+    fun aClassNeitherTheEntryNorTheModelKnowsStillGetsALabel() {
+        val c = Catalog.parse(fixture("catalog_min.json"))
+        assertEquals("class 999", c.labelFor(Mode.QPDS, c.entries(Mode.QPDS)[0], 999))
     }
 
     @Test
@@ -79,15 +101,24 @@ class CatalogTest {
         assertTrue("expected the generated catalog at ${asset.absolutePath}", asset.isFile)
 
         val c = Catalog.parse(asset.readText())
-        assertEquals(21, c.entries(Mode.QPDS).size)
+        assertEquals(22, c.entries(Mode.QPDS).size)
         assertEquals(8, c.entries(Mode.POSM).size)
 
-        // Every slab resolves at least one class after the `:size` key fix.
-        assertTrue(c.entries(Mode.QPDS).none { it.isEmpty })
+        // Two entries are genuinely unlabelable, and both are real: the
+        // deployed models have no class for their materials. WINTER_QPDS
+        // arrived with the Nov'26 standards ahead of its Vaseline models, and
+        // mini_meals wants a Knorr sticker the POSM model cannot detect. These
+        // are the picker's refusal path, not a generation bug.
+        assertEquals(
+            listOf("WINTER_QPDS"),
+            c.entries(Mode.QPDS).filter { it.isEmpty }.map { it.key },
+        )
+        assertTrue(c.entries(Mode.POSM).first { it.key == "mini_meals" }.isEmpty)
 
-        // mini_meals is genuinely unlabelable: the model has no class for its
-        // one material. A real case for the picker's refusal path.
-        val miniMeals = c.entries(Mode.POSM).first { it.key == "mini_meals" }
-        assertTrue(miniMeals.isEmpty)
+        // Every model class has a name, so nothing on screen can read
+        // "class 54" while the model knows it is a Tresemme hair mask.
+        val anySlab = c.entries(Mode.QPDS).first()
+        assertEquals("tresemme_mask_25", c.labelFor(Mode.QPDS, anySlab, 54))
+        assertEquals("dove_mask_25", c.labelFor(Mode.QPDS, anySlab, 12))
     }
 }

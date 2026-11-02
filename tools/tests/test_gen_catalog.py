@@ -143,6 +143,25 @@ def test_slab_with_every_class_missing_yields_empty_class_ids_not_an_error():
     assert len(slab["missing_from_model"]) > 0
 
 
+def test_catalog_carries_every_model_class_name():
+    """Names for classes no entry expects, so the app can still label them.
+
+    With the allowlist off, the app deliberately shows classes outside the
+    chosen slab. Without these it printed "class 12" and "class 54" at 100%
+    confidence, which is the model being right and the app being unable to
+    say so.
+    """
+    cat = build_catalog(QPDS_MIN, POSM_MIN, NAMES_MIN, QPDS_CLS_NAMES_MIN)
+    assert cat["model_classes"]["posm"]["31"] == "orphan_class"
+    assert cat["model_classes"]["qpds_cls"]["11"] == "gl_mltvit_crm"
+
+
+def test_model_class_names_are_absent_when_that_model_was_not_exported():
+    cat = build_catalog(QPDS_MIN, POSM_MIN, NAMES_MIN, None)
+    assert "qpds_cls" not in cat["model_classes"]
+    assert "posm" in cat["model_classes"]
+
+
 def test_qpds_slabs_are_empty_until_the_classifier_is_exported():
     # Task 2 runs before Task 12, so the first real catalog is built with no
     # QPDS classifier names. Claiming every class is "missing from the model"

@@ -132,9 +132,6 @@ class OverlayView @JvmOverloads constructor(
         // status line has to honour it explicitly. Without this it draws at
         // y=0 and sits on top of the system clock, which is exactly the
         // overlap this app already had once.
-        // Padding reserves space but does not move the canvas, so the chrome
-        // has to honour it explicitly. Without this it draws at y=0 and sits
-        // on the system clock.
         val top = paddingTop.toFloat()
         val line = loadingMessage ?: status
         if (line.isNotEmpty()) {

@@ -20,6 +20,10 @@
       "unmapped_model_classes": ["orphan_class"]
     }
   ],
+  "model_classes": {
+    "posm": { "12": "closeup_ls_poster", "31": "orphan_class", "41": "ps_gal_sticker" },
+    "qpds_cls": { "3": "horlicks_std", "41": "dove_mask_25" }
+  },
   "posm_categories": [
     {
       "key": "oral_care",
