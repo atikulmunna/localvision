@@ -1,0 +1,100 @@
+[
+  {
+    "pipeline": "POSM",
+    "imgsz": 640,
+    "delegate": "GPU",
+    "requested": "GPU",
+    "loadMs": 4560,
+    "runs": 20,
+    "wallMs": 367.85,
+    "stages": {
+      "infer": 201.95,
+      "prep": 165.3,
+      "decode": 0.15
+    }
+  },
+  {
+    "pipeline": "POSM",
+    "imgsz": 960,
+    "delegate": "GPU",
+    "requested": "GPU",
+    "loadMs": 5406,
+    "runs": 20,
+    "wallMs": 705.1,
+    "stages": {
+      "infer": 398.6,
+      "prep": 306,
+      "decode": 0.15
+    }
+  },
+  {
+    "pipeline": "QPDS",
+    "imgsz": 640,
+    "delegate": "GPU",
+    "requested": "GPU",
+    "loadMs": 7442,
+    "runs": 10,
+    "wallMs": 3085.7,
+    "stages": {
+      "seg": 236.5,
+      "prep": 211.6,
+      "decode": 1.9,
+      "cls x24": 2635.5
+    }
+  },
+  {
+    "pipeline": "POSM",
+    "imgsz": 640,
+    "delegate": "CPU_XNNPACK",
+    "requested": "CPU_XNNPACK",
+    "loadMs": 124,
+    "runs": 20,
+    "wallMs": 1383.5,
+    "stages": {
+      "infer": 1265.3,
+      "prep": 118.2,
+      "decode": 0
+    }
+  },
+  {
+    "pipeline": "POSM",
+    "imgsz": 960,
+    "delegate": "CPU_XNNPACK",
+    "requested": "CPU_XNNPACK",
+    "loadMs": 196,
+    "runs": 20,
+    "wallMs": 3231.55,
+    "stages": {
+      "infer": 2969.25,
+      "prep": 262.25,
+      "decode": 0
+    }
+  },
+  {
+    "pipeline": "QPDS",
+    "imgsz": 640,
+    "delegate": "CPU_XNNPACK",
+    "requested": "CPU_XNNPACK",
+    "loadMs": 117,
+    "runs": 10,
+    "wallMs": 4456,
+    "stages": {
+      "seg": 1880.4,
+      "prep": 130.3,
+      "decode": 0.1,
+      "cls x24": 2445.2
+    }
+  },
+  {
+    "pipeline": "YuvToRgb",
+    "source": "720x1280",
+    "runs": 30,
+    "wallMs": 84.03333333333333
+  },
+  {
+    "pipeline": "YuvToRgb",
+    "source": "480x640",
+    "runs": 30,
+    "wallMs": 28.1
+  }
+]
