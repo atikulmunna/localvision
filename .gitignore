@@ -11,6 +11,7 @@ tasks.md
 *.onnx
 app/src/main/assets/models/
 exports/
+exports_int8/
 validation/images/
 validation/server/
 

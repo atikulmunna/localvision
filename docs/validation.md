@@ -119,3 +119,72 @@ python diff_labels.py --reference ../validation/ref_posm.json --app ../validatio
 
 Add `--cls-model ../exports/qpds_cls_224.tflite --catalog ... --entry <SLAB>`
 for the QPDS two-stage reference.
+
+## The static int8 decision
+
+**Not adopted.** Four measurements, every one against it.
+
+### It is not smaller
+
+| | Size |
+|---|---|
+| `w8a32` | 54.2 MiB |
+| static int8 | 54.7 MiB |
+
+This was the main reason to want it, and it was a misconception on my part.
+`w8a32` already stores int8 **weights**; static int8 additionally quantizes
+**activations**. Weights are what a file is made of, so the file does not
+shrink. The spec's hope that static int8 would quarter the assets, and my own
+suggestion that it might fix the startup wait, were both wrong.
+
+### It loses the NMS-free head
+
+| | Output |
+|---|---|
+| `w8a32` | `[1, 300, 6]`, one row per detection |
+| static int8 | `[1, 52, 8400]`, the raw one2many head |
+
+Exactly as `engine/exporter.py` warns: Ultralytics force-disables the end2end
+branch for `quantize` of `8` or `w8a16`, because static activation
+quantization collapses its class-index output.
+
+So adopting it means writing NMS, introducing an IoU threshold to tune, and
+decoding a head measured as duplicate-heavy: on the probe image, 9 of the 11
+anchors above threshold duplicated a higher-scoring box, where the NMS-free
+head returned 2 clean detections.
+
+### The speed gain is modest, and may not survive the device
+
+Desktop CPU, same image, 10 runs:
+
+| | Load | Inference |
+|---|---|---|
+| `w8a32` | 901 ms | 707 ms |
+| static int8 | 498 ms | 604 ms |
+
+About 15% faster inference. Worth having, but not worth a hand-written NMS on
+its own, and the device's real startup cost is GPU delegate initialisation
+(4.5 s), not model parsing. A fully int8 model is if anything more likely to
+fall back off the GPU, since the delegate already rejects several ops in this
+graph.
+
+### Its accuracy cannot be checked
+
+The spec's own criterion is that static int8 is "adopted only if its labels
+agree with the w8a32 baseline on the validation set". That test cannot be
+run:
+
+- **No calibration corpus.** Static int8 needs representative images to set
+  activation ranges. Two fixture images is not a calibration set, and
+  Ultralytics' default (a COCO sample) is the wrong domain entirely.
+- **No validation corpus**, for the same reason recorded above.
+
+Adopting a quantization whose accuracy is unmeasurable, in exchange for 15%
+and a hand-written NMS, is not a trade worth making.
+
+### If this is revisited
+
+It becomes worth re-testing when there is a real image corpus, or when
+targeting the Hexagon NPU, which requires static int8. Both change the
+arithmetic. The export itself works and is a single flag
+(`--quantize 8`), so nothing here is lost.
