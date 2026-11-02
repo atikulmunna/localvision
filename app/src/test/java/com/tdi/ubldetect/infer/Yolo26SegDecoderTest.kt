@@ -130,8 +130,30 @@ class Yolo26SegDecoderTest {
             rowsWithCoeffs(0.9f, coeffs, floatArrayOf(0f, 0f, 960f, 960f)),
             segShape, 0.20f, 40, Letterbox.compute(1920, 1080, 960),
         )[0]
-        val m = Yolo26SegDecoder.maskFor(inst, FloatArray(32 * 240 * 240) { 1f }, intArrayOf(1, 32, 240, 240), t)
+
+        val t960 = Letterbox.compute(1920, 1080, 960)
+        val m = Yolo26SegDecoder.maskFor(
+            inst, FloatArray(32 * 240 * 240) { 1f }, intArrayOf(1, 32, 240, 240), t960,
+        )
         assertEquals(240, m.width)
+    }
+
+    @Test
+    fun theGridContainsTheWholeBoxWhenItDoesNotLandOnCellBoundaries() {
+        // Truncating both ends left the box poking out of its own mask. A box
+        // from model 10 to 330 spans cells 2.5 to 82.5, so the grid has to
+        // run from cell 2 to cell 83: floor one side, ceil the other. Taking
+        // floor on both gave cells 2 to 82, and every source pixel in the
+        // last 20 model px of the box then indexed past the grid and got the
+        // edge cell's value instead of its own.
+        val coeffs = FloatArray(32).also { it[0] = 1f }
+        val inst = Yolo26SegDecoder.decode(
+            rowsWithCoeffs(0.9f, coeffs, floatArrayOf(10f, 10f, 330f, 330f)),
+            segShape, 0.20f, 40, t,
+        )[0]
+        val m = Yolo26SegDecoder.maskFor(inst, unitProtos(), protoShape, t)
+        assertEquals(81, m.width)
+        assertEquals(81, m.height)
     }
 
     @Test

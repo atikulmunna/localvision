@@ -29,7 +29,8 @@ object CropBuilder {
 
     /**
      * @param box the instance box in source-frame coordinates
-     * @param mask that instance's mask, covering the same box
+     * @param mask that instance's mask, which knows which part of the frame
+     *   it covers
      * @param maskThreshold cells at or above this count as product
      * @param out reused between instances; NCHW float, `outSize^2 * 3 * 4` bytes
      * @return false for a crop with no area, which the caller skips, as the
@@ -65,8 +66,6 @@ object CropBuilder {
         val padY = (outSize - cropH * scale) / 2f
 
         val src = frame.buffer
-        val boxW = box.width()
-        val boxH = box.height()
 
         for (oy in 0 until outSize) {
             val cy = (oy + 0.5f - padY) / scale - 0.5f
@@ -90,12 +89,10 @@ object CropBuilder {
                 val sx = x0 + cx
                 val sy = y0 + cy
 
-                // The mask covers the box, so index it by where this pixel
-                // falls within the box. Going through fractions keeps this
-                // independent of the proto grid's stride.
-                val mx = (((sx - box.left) / boxW) * mask.width).toInt().coerceIn(0, mask.width - 1)
-                val my = (((sy - box.top) / boxH) * mask.height).toInt().coerceIn(0, mask.height - 1)
-                if (mask.at(mx, my) < maskThreshold) {
+                // The mask places itself. It covers whole proto cells, not
+                // the box, so indexing it by position within the box put it
+                // in the wrong place.
+                if (mask.atSource(sx, sy) < maskThreshold) {
                     floats.put(i, 0f)
                     floats.put(plane + i, 0f)
                     floats.put(2 * plane + i, 0f)

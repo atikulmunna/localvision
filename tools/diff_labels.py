@@ -136,11 +136,20 @@ def _judge(
 
 
 def _load(path: Path) -> dict[str, list[dict]]:
-    """Accepts either {image: [detections]} or a single sidecar file."""
+    """Accepts either {image: [detections]} or a single sidecar file.
+
+    Both shapes are real: the app dumps one file per run keyed by image, and
+    a trimmed or hand-written reference is usually a bare list per image. The
+    second shape raised `AttributeError: 'list' object has no attribute
+    'get'` until this was fixed, because only the dict shape was ever tried.
+    """
     data = json.loads(path.read_text(encoding="utf-8"))
     if "detections" in data:
         return {path.stem: data["detections"]}
-    return {k: v.get("detections", v) for k, v in data.items()}
+    return {
+        k: (v.get("detections", []) if isinstance(v, dict) else v)
+        for k, v in data.items()
+    }
 
 
 def main(argv: list[str] | None = None) -> int:

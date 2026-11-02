@@ -36,6 +36,15 @@ For QPDS the reference reimplements the two-stage path in Python, including
 the masked crop. That is the point of it: evidence only counts if the two
 implementations were written separately.
 
+It also takes a **different route to the mask**, deliberately. The reference
+builds the whole P by P mask, upsamples it to the model square, strips the
+letterbox padding and resizes to the frame, which is the server's chain. The
+app computes only the cells its box touches and maps each source pixel into
+one. Those are two implementations of one geometry; they used to be two copies
+of the app's, which cannot expose a misplaced mask because both would misplace
+it the same way. That is exactly what happened, and the section below records
+what it cost.
+
 ## Result
 
 Run with `tools/diff_labels.py`, matching detections positionally at IoU 0.5
@@ -59,6 +68,11 @@ so that a class flip on an agreeing box is visible rather than hidden.
 class flipped, and boxes agree to roughly 1% IoU. This is the "neither"
 outcome: no preprocessing bug, and on these images not even visible drift.
 
+These numbers are from the re-run after the mask geometry was corrected and
+the reference was rewritten to the server's chain. They are identical to the
+run before it, which is worth stating plainly rather than presenting the
+agreement as a fresh result.
+
 It covers the whole chain, not just the easy half. The QPDS row exercises
 `CropBuilder` and the mask decode, which POSM never touches, against a
 separately written implementation of the server's crop geometry.
@@ -69,6 +83,30 @@ this is arithmetic order and the delegate, not preprocessing.
 
 Zero detections on `posm_fixture.jpg` under QPDS is correct. It is a POSM
 poster photographed against a door, with no DOVE or LUX products in it.
+
+## What the mask misplacement actually cost here
+
+A review found that the app placed each instance's mask by stretching its
+sub-grid over the box, while the sub-grid in fact covers whole proto cells:
+floored one side, ceilinged the other, clamped to the grid. The two are not
+the same rectangle.
+
+Measured on `qpds_fixture.jpg` (1440x1080, imgsz 640, 24 instances at
+`seg_conf` 0.20):
+
+| | |
+|---|---|
+| proto grid | 160, so one cell is 4 model px or 9 source px |
+| boxes extending outside the model square | 0 |
+| largest old-versus-new mask shift | 9 source px, one cell, 0.6% of frame width |
+
+So on this image the mask edge was out by at most a single cell, which is why
+the diff above is unchanged: a 9 px error at the edge of a centred product
+does not move the classifier. The serious case, a box hanging off the frame
+edge where the clamp both offsets and stretches the mask, **does not occur on
+either fixture**, so it is pinned by unit test
+(`CropBuilderTest.maskGeometryFollowsTheRegionTheGridCoversNotTheBox`) and not
+by this evidence.
 
 ## The gap in this evidence
 

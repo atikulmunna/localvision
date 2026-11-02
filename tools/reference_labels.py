@@ -91,6 +91,11 @@ def qpds(seg: Interpreter, cls: Interpreter, image: Path, imgsz: int,
     if it was written separately. The geometry it mirrors is the server's
     (`core/detection.py`): mask out the background, crop the integer box,
     letterbox onto black, classify.
+
+    The mask is deliberately built the server's way, whole and upsampled to
+    the image, rather than the app's way, cell by cell within the box. Two
+    routes to the same geometry is what makes a disagreement meaningful; two
+    copies of one route only proves they were copied.
     """
     bgr = cv2.imread(str(image))
     rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
@@ -102,19 +107,27 @@ def qpds(seg: Interpreter, cls: Interpreter, image: Path, imgsz: int,
     od = seg.get_output_details()
     rows = seg.get_tensor(od[0]["index"])[0]        # 300 x 38
     protos = seg.get_tensor(od[1]["index"])[0]      # 32 x P x P
-    grid = protos.shape[1]
-    cell = grid / imgsz
+
+    # The frame's extent inside the square, computed the way letterbox() did
+    # it, so the mask can be un-letterboxed by slicing. Deriving it from the
+    # padding instead would be off by one whenever the remainder is odd.
+    nw, nh = round(W * scale), round(H * scale)
 
     out = []
     for r in rows:
         if len(out) >= cap or float(r[4]) < seg_conf:
             break
-        # mask over this instance's box only, as the app does
-        gx0 = max(0, min(grid - 1, int(r[0] * cell)))
-        gy0 = max(0, min(grid - 1, int(r[1] * cell)))
-        gx1 = max(gx0 + 1, min(grid, int(r[2] * cell)))
-        gy1 = max(gy0 + 1, min(grid, int(r[3] * cell)))
-        mask = sigmoid(np.tensordot(r[6:], protos[:, gy0:gy1, gx0:gx1], axes=(0, 0)))
+        # The server's chain, not the app's: build the whole mask, bring it to
+        # full image size, then crop. The app instead computes only the cells
+        # its box touches and indexes them per pixel. Same geometry by two
+        # routes, which is the only reason this file is evidence. Doing it the
+        # app's way here, as this once did, meant a shared misplacement of the
+        # mask could not show up as a disagreement.
+        mask = sigmoid(np.tensordot(r[6:], protos, axes=(0, 0)))
+        in_square = cv2.resize(mask, (imgsz, imgsz), interpolation=cv2.INTER_NEAREST)
+        in_source = cv2.resize(
+            in_square[py:py + nh, px:px + nw], (W, H), interpolation=cv2.INTER_NEAREST,
+        )
 
         # box back to source pixels, truncated then clamped like the app
         sx0 = max(0, min(W, int((float(r[0]) - px) / scale)))
@@ -126,9 +139,7 @@ def qpds(seg: Interpreter, cls: Interpreter, image: Path, imgsz: int,
 
         crop = rgb[sy0:sy1, sx0:sx1].copy()
         ch, cw = crop.shape[:2]
-        # mask upsampled to the crop, nearest, then background blacked out
-        up = cv2.resize(mask, (cw, ch), interpolation=cv2.INTER_NEAREST)
-        crop[up < 0.5] = 0
+        crop[in_source[sy0:sy1, sx0:sx1] < 0.5] = 0
 
         s2 = min(224 / cw, 224 / ch)
         rc = cv2.resize(crop, (max(1, round(cw * s2)), max(1, round(ch * s2))),

@@ -166,7 +166,18 @@ assumed.
 ### Building a mask
 
 `sigmoid(coeffs . protos)` over the 32 channels, giving a P by P grid in 0..1.
-An instance's box maps into that grid by dividing by 4.
+An instance's box maps into that grid by multiplying by P/N, which is a
+quarter at every exported size.
+
+A cell is therefore 4 model pixels wide, and a box does not land on cell
+boundaries. Computing the mask over only the cells a box touches, which the
+app does so that cost scales with the product rather than the picture, means
+the resulting grid covers a slightly **larger** region than the box: floored
+to the cell below on one side, ceilinged to the cell above on the other, and
+clamped to the grid where the box runs off the square. Placing that grid back
+on the frame has to use the region it covers, not the box. Treating the two as
+the same put every mask up to one cell out, which is 9 source pixels on a
+1440 wide frame at imgsz 640, and considerably worse for a clipped box.
 
 Verified on a real shelf photo (1440x1080, 24 instances at `seg_conf` 0.20):
 for the top instance the mask averaged **0.948 inside its box against 0.374
