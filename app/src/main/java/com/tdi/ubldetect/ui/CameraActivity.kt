@@ -146,6 +146,7 @@ class CameraActivity : ComponentActivity() {
         if (next.frozen != previous.frozen) {
             if (next.frozen) overlayView.freeze() else overlayView.unfreeze()
         }
+        overlayView.showBoxes = next.showBoxes
 
         if (!next.requiresReload(previous)) return
 

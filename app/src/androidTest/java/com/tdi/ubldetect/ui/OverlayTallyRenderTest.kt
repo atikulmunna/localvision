@@ -44,8 +44,13 @@ class OverlayTallyRenderTest {
         0.80f + i * 0.01f,
     )
 
-    private fun render(detections: List<Detection>, frozen: Boolean = false): Bitmap {
+    private fun render(
+        detections: List<Detection>,
+        frozen: Boolean = false,
+        showBoxes: Boolean = true,
+    ): Bitmap {
         val view = OverlayView(ctx)
+        view.showBoxes = showBoxes
         val w = 1080
         val h = 2340
         view.measure(
@@ -92,6 +97,24 @@ class OverlayTallyRenderTest {
         // must differ from the bare background.
         val background = Color.rgb(90, 95, 100)
         assertNotEquals(background, bitmap.getPixel(40, 300))
+    }
+
+    @Test
+    fun hidingTheBoxesKeepsTheTally() {
+        // The reason to hide them is to look at the shelf, not to stop
+        // counting it.
+        val dets = List(3) { detection(11, it) } + listOf(detection(14, 0))
+        val withBoxes = render(dets)
+        val without = render(dets, showBoxes = false)
+        write(without, "tally_no_boxes.png")
+
+        // Same panel, drawn in the same place. Sampled inside the first
+        // row, above where any box label reaches, so the comparison is of
+        // the panel rather than of a label showing through it.
+        assertEquals(withBoxes.getPixel(60, 160), without.getPixel(60, 160))
+        // Where a box outline was, bare preview.
+        assertEquals(Color.rgb(90, 95, 100), without.getPixel(42, 500))
+        assertNotEquals(Color.rgb(90, 95, 100), withBoxes.getPixel(42, 500))
     }
 
     @Test

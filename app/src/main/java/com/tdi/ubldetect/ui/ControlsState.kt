@@ -20,6 +20,15 @@ data class ControlsState(
     val useAllowlist: Boolean = true,
     val delegate: DelegateKind = DelegateKind.GPU,
     val frozen: Boolean = false,
+    /**
+     * Draw the boxes and their labels.
+     *
+     * On by default, because the boxes are the point of a detection viewer.
+     * Turning them off leaves the preview clear and the tally still counting,
+     * which is what you want when looking at the shelf itself rather than at
+     * what the model thinks of it.
+     */
+    val showBoxes: Boolean = true,
     /** `fixed_shelf` instance cap, used by the QPDS pipeline in phase 2. */
     val instanceCap: Int = 40,
 ) {

@@ -95,6 +95,7 @@ class ControlsPanel(
                         push(state.copy(delegate = next))
                     },
                 )
+                addView(chip("Boxes") { push(state.copy(showBoxes = !state.showBoxes)) })
                 addView(chip("Hold") { push(state.copy(frozen = !state.frozen)) })
                 addView(chip("Save") { onSave() })
             },
@@ -152,6 +153,7 @@ class ControlsPanel(
             setChipActive("$size", state.imgsz == size)
         }
         setChipActive("Filter", state.useAllowlist)
+        setChipActive("Boxes", state.showBoxes)
         setChipActive("GPU", state.delegate == DelegateKind.GPU)
         setChipActive("Hold", state.frozen)
         setChipActive("Save", false)

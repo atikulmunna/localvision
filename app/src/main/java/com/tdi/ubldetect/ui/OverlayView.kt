@@ -55,6 +55,19 @@ class OverlayView @JvmOverloads constructor(
      * so without this the person watches a live preview draw no boxes and
      * reasonably concludes the detector is broken.
      */
+    /**
+     * Whether to draw the boxes and their labels.
+     *
+     * The tally is deliberately not affected. With boxes off the preview is
+     * clear and the counts still say what is up there, which is the reason
+     * to turn them off in the first place.
+     */
+    var showBoxes: Boolean = true
+        set(value) {
+            field = value
+            invalidate()
+        }
+
     var loadingMessage: String? = "Loading model"
         set(value) {
             field = value
@@ -174,7 +187,7 @@ class OverlayView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        for (d in state.drawn) {
+        for (d in if (showBoxes) state.drawn else emptyList()) {
             val r = PreviewMapping.mapRect(d.box, mapping)
             scratch.set(r.left, r.top, r.right, r.bottom)
             canvas.drawRect(scratch, boxPaint)

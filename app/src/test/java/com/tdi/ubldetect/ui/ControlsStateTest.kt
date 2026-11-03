@@ -83,4 +83,18 @@ class ControlsStateTest {
         assertEquals("models/posm_640.tflite", ControlsState(imgsz = 640).assetFor("posm"))
         assertEquals("models/posm_960.tflite", ControlsState(imgsz = 960).assetFor("posm"))
     }
+
+    @Test
+    fun boxesStartVisible() {
+        // A detection viewer that opens showing nothing would look broken.
+        assertTrue(ControlsState().showBoxes)
+    }
+
+    @Test
+    fun hidingTheBoxesDoesNotReloadTheModel() {
+        // It is a drawing decision. Tearing down a 57 MB interpreter to stop
+        // painting rectangles would be absurd, and slow.
+        val before = ControlsState()
+        assertFalse(before.copy(showBoxes = false).requiresReload(before))
+    }
 }
