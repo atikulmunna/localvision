@@ -13,11 +13,13 @@ These tests pin that classification, because getting it backwards sends
 someone hunting a letterbox bug that does not exist.
 """
 
+import json
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+import diff_labels
 from diff_labels import Verdict, box_iou, compare_image
 
 
@@ -111,3 +113,34 @@ def test_matching_prefers_the_best_overlapping_box():
     r = compare_image(reference, app)
     assert r.matched == 1
     assert r.class_flips == 0
+
+
+def test_load_accepts_a_bare_list_of_detections_per_image(tmp_path):
+    """The format the docstring promises, which used to crash.
+
+    `{image: [detections]}` is what a trimmed or hand-written reference looks
+    like. `_load` called `.get` on the list and raised
+    `AttributeError: 'list' object has no attribute 'get'`, so the documented
+    shape failed at the first step and nothing covered it.
+    """
+    p = tmp_path / "ref.json"
+    p.write_text(json.dumps({
+        "a.jpg": [{"classId": 1, "score": 0.9,
+                   "left": 0, "top": 0, "right": 10, "bottom": 10}],
+    }))
+    loaded = diff_labels._load(p)
+    assert list(loaded) == ["a.jpg"]
+    assert loaded["a.jpg"][0]["classId"] == 1
+
+
+def test_load_accepts_the_apps_dump_shape(tmp_path):
+    # The app writes {image: {detections: [...], ...}}.
+    p = tmp_path / "app.json"
+    p.write_text(json.dumps({"a.jpg": {"detections": [{"classId": 2}], "timingsMs": {}}}))
+    assert diff_labels._load(p)["a.jpg"][0]["classId"] == 2
+
+
+def test_load_accepts_a_single_sidecar_file(tmp_path):
+    p = tmp_path / "frame.json"
+    p.write_text(json.dumps({"detections": [{"classId": 3}], "width": 8}))
+    assert diff_labels._load(p) == {"frame": [{"classId": 3}]}

@@ -23,8 +23,14 @@ data class CatalogEntry(
     @SerialName("missing_from_model") val missingFromModel: List<String> = emptyList(),
     @SerialName("unmapped_model_classes") val unmappedModelClasses: List<String> = emptyList(),
 ) {
-    /** Membership set, because filtering happens per detection per frame. */
-    val classIds: Set<Int> get() = classIdList.toSet()
+    /**
+     * Membership set, because filtering happens per detection per frame.
+     *
+     * Built once. As a getter it allocated a fresh HashSet on every read, and
+     * both pipelines read it per frame, which is the opposite of the reason
+     * it is a set at all.
+     */
+    val classIds: Set<Int> = classIdList.toSet()
 
     /**
      * True when nothing here can ever be labelled.
