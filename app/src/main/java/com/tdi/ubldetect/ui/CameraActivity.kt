@@ -16,6 +16,7 @@ import com.tdi.ubldetect.camera.FrameSource
 import com.tdi.ubldetect.catalog.Catalog
 import com.tdi.ubldetect.catalog.CatalogEntry
 import com.tdi.ubldetect.catalog.Mode
+import com.tdi.ubldetect.UblApp
 import com.tdi.ubldetect.imaging.FrameSnapshot
 import com.tdi.ubldetect.models
 import com.tdi.ubldetect.imaging.PreviewMapping
@@ -81,8 +82,9 @@ class CameraActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // Declared before anything is acquired and given back in
         // releaseModels, so memory pressure cannot close an interpreter with
-        // a frame inside it.
-        models.beginUse()
+        // a frame inside it. Through the app, which also cancels a pending
+        // release so returning inside the grace period finds them loaded.
+        (application as UblApp).beginUse()
 
         mode = Mode.valueOf(intent.getStringExtra(EXTRA_MODE) ?: Mode.POSM.name)
         val key = intent.getStringExtra(EXTRA_KEY).orEmpty()
@@ -341,7 +343,7 @@ class CameraActivity : ComponentActivity() {
     private fun releaseModels() {
         pipeline = null
         runners = emptyList()
-        models.endUse()
+        (application as UblApp).endUse()
     }
 
     companion object {
