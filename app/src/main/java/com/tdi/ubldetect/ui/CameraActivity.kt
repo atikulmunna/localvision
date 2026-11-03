@@ -17,6 +17,7 @@ import com.tdi.ubldetect.catalog.Catalog
 import com.tdi.ubldetect.catalog.CatalogEntry
 import com.tdi.ubldetect.catalog.Mode
 import com.tdi.ubldetect.imaging.FrameSnapshot
+import com.tdi.ubldetect.models
 import com.tdi.ubldetect.imaging.PreviewMapping
 import com.tdi.ubldetect.infer.ModelAssetMissing
 import com.tdi.ubldetect.infer.TfliteRunner
@@ -78,6 +79,10 @@ class CameraActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Declared before anything is acquired and given back in
+        // releaseModels, so memory pressure cannot close an interpreter with
+        // a frame inside it.
+        models.beginUse()
 
         mode = Mode.valueOf(intent.getStringExtra(EXTRA_MODE) ?: Mode.POSM.name)
         val key = intent.getStringExtra(EXTRA_KEY).orEmpty()
@@ -185,10 +190,7 @@ class CameraActivity : ComponentActivity() {
      */
     private fun buildPipeline(s: ControlsState): Boolean {
         val startedAt = android.os.SystemClock.elapsedRealtime()
-        val assets = when (mode) {
-            Mode.POSM -> listOf(s.assetFor("posm"))
-            Mode.QPDS -> listOf(s.assetFor("qpds_seg"), "models/qpds_cls_224.tflite")
-        }
+        val assets = s.assetsFor(mode)
         val missing = assets.firstOrNull { !TfliteRunner.assetExists(this, it) }
         if (missing != null) {
             // Review Focus 5: a resolution whose file was never shipped is a
@@ -199,22 +201,20 @@ class CameraActivity : ComponentActivity() {
         }
 
         pipeline = null
-        runners.forEach { it.close() }
         runners = emptyList()
 
-        // Opened into a local list so a failure part way through can close
-        // what did open. QPDS opens two, and leaving the segmenter behind
-        // when the classifier fails costs 57 MB for the session.
-        val opened = mutableListOf<TfliteRunner>()
+        // From the pool, which keeps what is still wanted and closes the rest
+        // before opening anything new. Picking another category in this mode
+        // asks for the models it already holds, so nothing is loaded at all.
+        val opened: List<TfliteRunner>
         try {
-            for (asset in assets) opened += TfliteRunner(this, asset, s.delegate)
+            opened = models.acquire(assets, s.delegate)
         } catch (e: Exception) {
             // Not only ModelAssetMissing. `FileChannel.map` raises
             // IOException and the XNNPACK interpreter raises
             // IllegalArgumentException, and letting either escape from here
             // left the old models already closed, no pipeline, no message,
             // and a live preview that never detected anything again.
-            opened.forEach { it.close() }
             Log.e(TAG, "could not open models for ${s.imgsz}", e)
             toast(
                 when (e) {
@@ -331,11 +331,17 @@ class CameraActivity : ComponentActivity() {
         if (source != null) source.stop(::releaseModels) else releaseModels()
     }
 
-    /** Runs on the analysis thread, the only thread that opens these. */
+    /**
+     * Runs on the analysis thread, the only thread that opens these.
+     *
+     * Hands the models back rather than closing them. They belong to the
+     * pool, which holds them for the next category and releases them when
+     * the app stops being looked at.
+     */
     private fun releaseModels() {
         pipeline = null
-        runners.forEach { it.close() }
         runners = emptyList()
+        models.endUse()
     }
 
     companion object {

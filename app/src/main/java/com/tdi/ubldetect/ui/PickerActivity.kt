@@ -13,6 +13,7 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import com.tdi.ubldetect.R
+import com.tdi.ubldetect.UblApp
 import com.tdi.ubldetect.catalog.Catalog
 import com.tdi.ubldetect.catalog.CatalogEntry
 import com.tdi.ubldetect.catalog.Mode
@@ -79,6 +80,11 @@ class PickerActivity : Activity() {
     }
 
     private fun showEntries(mode: Mode) {
+        // The load takes about as long as choosing from this list does, so it
+        // starts now rather than after the tap. Defaults, because that is
+        // what CameraActivity starts from.
+        val defaults = ControlsState()
+        (application as UblApp).warmUp(defaults.assetsFor(mode), defaults.delegate)
         container.removeAllViews()
         container.addView(title(if (mode == Mode.POSM) "Category" else "Slab"))
         container.addView(backRow { showModes() })

@@ -13,6 +13,7 @@ import com.tdi.ubldetect.catalog.Mode
 import com.tdi.ubldetect.infer.TfliteRunner
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -77,25 +78,26 @@ class CameraTeardownTest {
     }
 
     /**
-     * Leaving during a model swap must still release the models.
+     * Leaving during a model swap must not strand an interpreter.
      *
      * The teardown wait was sized for a frame, at "roughly 400 ms", but model
-     * loads run on the same single thread and cost about 3.5 s each, so QPDS
-     * spends some 7 s loading two. Tap a resolution and press back inside
-     * that window and the wait expires with the load still running. The
-     * activity then closes a list of runners that the loading thread has not
-     * filled in yet, so both new interpreters stay open for the life of the
-     * process, and if the timing lands the other way it closes one the
-     * loading thread is still using.
+     * loads run on the same single thread and cost about 3.5 s each. Tap a
+     * resolution and press back inside that window and the wait expired with
+     * the load still running, so the activity closed a runner list the
+     * loading thread had not filled in yet. Measured at the time: four
+     * interpreters left open after one cycle.
      *
-     * The existing tests cannot see this: none of them swaps, and a leak
-     * raises nothing.
+     * The assertion is non-growth rather than zero, because models are now
+     * deliberately kept between screens: the pool holds the working set so
+     * the next category does not reload it. A leak shows up as a count that
+     * climbs with every cycle; the working set does not.
      */
     @Test
-    fun leavingDuringAResolutionSwapReleasesEveryInterpreter() {
-        repeat(2) {
+    fun leavingDuringAResolutionSwapDoesNotStrandInterpreters() {
+        val counts = mutableListOf<Int>()
+        repeat(3) {
             ActivityScenario.launch<CameraActivity>(
-                cameraIntent(Mode.QPDS, "DOVE_LUX_INTERNATIONAL"),
+                cameraIntent(Mode.POSM, "hair_care"),
             ).use { scenario ->
                 // The first load has to finish, or the swap is a no-op.
                 Thread.sleep(SWAP_SETTLE_MS)
@@ -104,22 +106,21 @@ class CameraTeardownTest {
                     assertNotNull("no 960 chip in the controls panel", chip)
                     chip!!.performClick()
                 }
-                // Mid-swap: two interpreters are opening on the analysis
-                // thread and the activity is about to go away under them.
+                // Mid-swap: a 57 MB model is opening on the analysis thread
+                // and the activity is about to go away under it.
                 Thread.sleep(300)
             }
-            // Release is queued behind the load, so it completes after
+            // The release is queued behind the load, so it lands after
             // onDestroy returns rather than inside it.
-            waitForNoLiveInterpreters()
-            assertEquals("interpreters left open after teardown", 0, TfliteRunner.live.get())
+            Thread.sleep(RELEASE_WAIT_MS)
+            counts += TfliteRunner.live.get()
         }
-    }
 
-    private fun waitForNoLiveInterpreters() {
-        val deadline = System.currentTimeMillis() + RELEASE_WAIT_MS
-        while (TfliteRunner.live.get() != 0 && System.currentTimeMillis() < deadline) {
-            Thread.sleep(100)
-        }
+        assertTrue(
+            "interpreters grew across cycles: $counts",
+            counts.all { it <= WORKING_SET_MAX },
+        )
+        assertEquals("interpreters grew across cycles: $counts", counts[0], counts[2])
     }
 
     /** The controls are built in code with no ids, so the label is the handle. */
@@ -134,10 +135,18 @@ class CameraTeardownTest {
     }
 
     private companion object {
-        /** Long enough for QPDS to finish opening both models. */
-        const val SWAP_SETTLE_MS = 9000L
+        /** Long enough for the first model to finish opening. */
+        const val SWAP_SETTLE_MS = 6000L
 
-        /** Generous: the release it is waiting on is behind a 3.5 s load. */
-        const val RELEASE_WAIT_MS = 15000L
+        /** Generous: what it waits for is queued behind a 3.5 s load. */
+        const val RELEASE_WAIT_MS = 9000L
+
+        /**
+         * Most interpreters the pool should ever hold.
+         *
+         * Two: QPDS's segmenter and classifier. A POSM swap closes the old
+         * resolution before opening the new one, so even mid-swap it is one.
+         */
+        const val WORKING_SET_MAX = 2
     }
 }

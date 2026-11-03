@@ -36,6 +36,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:node="remove" />
 
     <application
+        android:name=".UblApp"
         android:allowBackup="false"
         android:label="localVision"
         android:supportsRtl="true"

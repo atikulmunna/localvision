@@ -1,5 +1,6 @@
 package com.tdi.ubldetect.ui
 
+import com.tdi.ubldetect.catalog.Mode
 import com.tdi.ubldetect.infer.DelegateKind
 
 /**
@@ -47,7 +48,22 @@ data class ControlsState(
     /** Asset path for a model family at this resolution. */
     fun assetFor(family: String): String = "models/${family}_$imgsz.tflite"
 
+    /**
+     * Every model a mode needs, in the order its pipeline indexes them.
+     *
+     * Deliberately not a function of the category: the same file serves every
+     * category in a mode, which is why they can be kept open between screens.
+     * The QPDS classifier has one resolution and so is named outright.
+     */
+    fun assetsFor(mode: Mode): List<String> = when (mode) {
+        Mode.POSM -> listOf(assetFor("posm"))
+        Mode.QPDS -> listOf(assetFor("qpds_seg"), QPDS_CLS)
+    }
+
     companion object {
+        /** One resolution only, so it is not built from [assetFor]. */
+        const val QPDS_CLS = "models/qpds_cls_224.tflite"
+
         /**
          * Resolutions with a shipped model.
          *
