@@ -5,6 +5,8 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF as AndroidRectF
+import android.text.TextPaint
+import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.View
 import com.tdi.ubldetect.R
@@ -34,6 +36,17 @@ class OverlayView @JvmOverloads constructor(
     private var mapping: ViewMapping = ViewMapping(1f, 0f, 0f)
     private var labeller: (Int) -> String = { "class $it" }
     private var status: String = ""
+
+    /**
+     * One line of the floating tally, measured and shortened ready to draw.
+     *
+     * Built in [submit] rather than in `onDraw`, which runs on every frame of
+     * a 30 fps preview and allocates nothing by design.
+     */
+    private class TallyLine(val name: CharSequence, val count: String, val nameWidth: Float)
+
+    private var tallyLines: List<TallyLine> = emptyList()
+    private var tallyWidth = 0f
 
     /**
      * Shown instead of the timings until the models are ready.
@@ -73,6 +86,24 @@ class OverlayView @JvmOverloads constructor(
         textSize = context.sp(12f)
         isFakeBoldText = true
     }
+    private val tallyBackPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = context.color(R.color.float_surface)
+    }
+    private val tallyBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        strokeWidth = dp(1f).toFloat()
+        color = context.color(R.color.float_border)
+    }
+    // A TextPaint, not a Paint: TextUtils.ellipsize measures with one.
+    private val tallyNamePaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = context.color(R.color.chrome_text)
+        textSize = context.sp(12f)
+    }
+    private val tallyCountPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = context.color(R.color.accent_bright)
+        textSize = context.sp(12f)
+        isFakeBoldText = true
+    }
 
     private val scratch = AndroidRectF()
 
@@ -84,8 +115,13 @@ class OverlayView @JvmOverloads constructor(
     fun submit(result: FrameResult?, m: ViewMapping, labeller: (Int) -> String) {
         mapping = m
         this.labeller = labeller
-        state.submit(result)
-        status = buildStatus(result)
+        // Only when the result was taken. A refused one, because the
+        // overlay is frozen or because it arrived out of order, must not
+        // leave a live count and live timings sitting above a held picture.
+        if (state.submit(result)) {
+            status = buildStatus(state.drawn.size, result)
+            buildTally()
+        }
         invalidate()
     }
 
@@ -94,15 +130,45 @@ class OverlayView @JvmOverloads constructor(
         invalidate()
     }
 
+    /**
+     * Rebuilds the tally lines for whatever is currently drawn.
+     *
+     * Long names are shortened to fit rather than wrapped or allowed to run
+     * off: half the POSM names are longer than a phone is wide, and the count
+     * is the column worth keeping.
+     */
+    private fun buildTally() {
+        val rows = Tally.of(state.drawn, labeller, TALLY_MAX_ROWS)
+        if (rows.isEmpty()) {
+            tallyLines = emptyList()
+            tallyWidth = 0f
+            return
+        }
+        val countWidth = rows.maxOf { tallyCountPaint.measureText(it.count.toString()) }
+        val room = width * TALLY_WIDTH_SHARE - dp(20f) - dp(14f) - countWidth
+        val nameRoom = room.coerceAtLeast(dp(60f).toFloat())
+
+        var widest = 0f
+        tallyLines = rows.map { row ->
+            val name = TextUtils.ellipsize(
+                row.label, tallyNamePaint, nameRoom, TextUtils.TruncateAt.END,
+            )
+            val w = tallyNamePaint.measureText(name, 0, name.length)
+            widest = maxOf(widest, w)
+            TallyLine(name, row.count.toString(), w)
+        }
+        tallyWidth = dp(20f) + widest + dp(14f) + countWidth
+    }
+
     fun unfreeze() {
         state.unfreeze()
         invalidate()
     }
 
-    private fun buildStatus(result: FrameResult?): String {
+    private fun buildStatus(drawn: Int, result: FrameResult?): String {
         if (result == null) return status
         val timings = result.timingsMs.entries.joinToString(" ") { "${it.key} ${it.value}ms" }
-        return "${result.detections.size} found  $timings"
+        return "$drawn found  $timings"
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -145,6 +211,28 @@ class OverlayView @JvmOverloads constructor(
             canvas.drawText(line, left + padH, top + dp(24f), statusPaint)
         }
 
+        // The tally floats under the status pill, left aligned with it.
+        if (tallyLines.isNotEmpty()) {
+            val left = paddingLeft + dp(12f).toFloat()
+            val rowH = dp(19f).toFloat()
+            val panelTop = top + dp(40f)
+            val panelBottom = panelTop + dp(14f) + rowH * tallyLines.size
+            scratch.set(left, panelTop, left + tallyWidth, panelBottom)
+            val radius = dp(10f).toFloat()
+            canvas.drawRoundRect(scratch, radius, radius, tallyBackPaint)
+            canvas.drawRoundRect(scratch, radius, radius, tallyBorderPaint)
+
+            val textLeft = left + dp(10f)
+            val countRight = left + tallyWidth - dp(10f)
+            var baseline = panelTop + dp(7f) + rowH - dp(5f)
+            for (line in tallyLines) {
+                canvas.drawText(line.name, 0, line.name.length, textLeft, baseline, tallyNamePaint)
+                val cw = tallyCountPaint.measureText(line.count)
+                canvas.drawText(line.count, countRight - cw, baseline, tallyCountPaint)
+                baseline += rowH
+            }
+        }
+
         if (state.frozen) {
             val label = "HOLD"
             val padH = dp(10f).toFloat()
@@ -154,5 +242,18 @@ class OverlayView @JvmOverloads constructor(
             canvas.drawRoundRect(scratch, dp(13f).toFloat(), dp(13f).toFloat(), statusBackPaint)
             canvas.drawText(label, right - w - padH, top + dp(24f), holdPaint)
         }
+    }
+
+    private companion object {
+        /**
+         * Lines the tally will show before folding the rest into "+N more".
+         *
+         * A crowded shelf can carry twenty kinds, and listing them all would
+         * cover the preview, which is the thing being looked at.
+         */
+        const val TALLY_MAX_ROWS = 8
+
+        /** How much of the width the panel may take before names are cut. */
+        const val TALLY_WIDTH_SHARE = 0.62f
     }
 }

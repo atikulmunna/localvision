@@ -33,15 +33,23 @@ class OverlayState {
     var frozen: Boolean = false
         private set
 
-    fun submit(result: FrameResult?) {
-        if (frozen) return
+    /**
+     * @return true when this result changed what is on screen.
+     *
+     * The caller needs to know, because the readout and the tally describe
+     * the drawn frame. Rebuilding them from a result that was refused put a
+     * live timing line and a live count above a frozen picture.
+     */
+    fun submit(result: FrameResult?): Boolean {
+        if (frozen) return false
         if (result == null) {
             drawn = emptyList()
-            return
+            return true
         }
-        if (result.frameTimestampNs < drawnTimestampNs) return
+        if (result.frameTimestampNs < drawnTimestampNs) return false
         drawn = result.detections
         drawnTimestampNs = result.frameTimestampNs
+        return true
     }
 
     fun freeze() {

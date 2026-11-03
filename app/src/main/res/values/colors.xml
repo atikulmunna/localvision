@@ -34,6 +34,14 @@
 
     <!-- Camera chrome, dark -->
     <color name="chrome">#B3000000</color>
+    <!--
+      The tally floats over the preview rather than sitting in the chrome, so
+      it is lighter than the status pill: enough to read white text on, not
+      enough to hide the shelf it is counting. The hairline is what keeps it
+      from dissolving into a dark shelf.
+    -->
+    <color name="float_surface">#8C0A0A0A</color>
+    <color name="float_border">#30FFFFFF</color>
     <color name="chrome_text">#FFFFFFFF</color>
     <color name="chip">#33FFFFFF</color>
     <color name="chip_active">#FF00A37A</color>
