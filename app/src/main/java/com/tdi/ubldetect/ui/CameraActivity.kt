@@ -16,8 +16,8 @@ import com.tdi.ubldetect.camera.FrameSource
 import com.tdi.ubldetect.catalog.Catalog
 import com.tdi.ubldetect.catalog.CatalogEntry
 import com.tdi.ubldetect.catalog.Mode
+import com.tdi.ubldetect.imaging.FrameSnapshot
 import com.tdi.ubldetect.imaging.PreviewMapping
-import com.tdi.ubldetect.imaging.RgbFrame
 import com.tdi.ubldetect.infer.ModelAssetMissing
 import com.tdi.ubldetect.infer.TfliteRunner
 import com.tdi.ubldetect.model.FrameResult
@@ -62,12 +62,19 @@ class CameraActivity : ComponentActivity() {
     @Volatile
     private var state = ControlsState()
 
-    /** Kept for the save button, which acts on what is currently on screen. */
-    @Volatile
-    private var lastFrame: RgbFrame? = null
-
-    @Volatile
-    private var lastResult: FrameResult? = null
+    /**
+     * What is currently on screen, copied, for the save button.
+     *
+     * A copy rather than the live frame. The camera reuses one RGB buffer, so
+     * reading it from the UI thread after the fact produced a saved JPEG that
+     * could be two frames spliced together with boxes belonging to neither.
+     *
+     * It also only updates while the overlay is accepting frames, which is
+     * what makes Hold mean something: freeze to read a label, press Save, and
+     * the file is the frame that was in front of you rather than whichever
+     * one the analysis thread has reached.
+     */
+    private val onScreen = FrameSnapshot<FrameResult>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -252,8 +259,13 @@ class CameraActivity : ComponentActivity() {
             // Null until the models finish loading; those frames are dropped.
             val result = pipeline?.process(frame, timestampNs, s, mapOf("yuv" to convertMs))
                 ?: return@FrameSource
-            lastFrame = frame
-            lastResult = result
+            // Frozen means the overlay is ignoring new frames, so the
+            // snapshot has to ignore them too, or Save would write a frame
+            // the person never saw. Read now rather than from `s` above: Hold
+            // can be pressed while this frame is in flight, and `s` is as the
+            // state was 400 ms ago, which would snapshot one frame past what
+            // the overlay kept.
+            if (!state.frozen) onScreen.take(frame, result)
             runOnUiThread {
                 if (overlayView.width == 0) return@runOnUiThread
                 overlayView.submit(
@@ -283,14 +295,30 @@ class CameraActivity : ComponentActivity() {
         runOnUiThread { Toast.makeText(this, text, Toast.LENGTH_SHORT).show() }
     }
 
+    /**
+     * Writes the frame on screen, on the analysis thread.
+     *
+     * Posted rather than done here for the same reason the model release is:
+     * it is the thread that owns the snapshot. Writing a JPEG is also not
+     * work for the UI thread.
+     */
     private fun onSave() {
-        val frame = lastFrame
-        if (frame == null) {
+        if (onScreen.taken == null) {
             Toast.makeText(this, "Nothing captured yet", Toast.LENGTH_SHORT).show()
             return
         }
-        val file = FrameSaver(this).save(frame, lastResult) { catalog.labelFor(mode, entry, it) }
-        Toast.makeText(this, "Saved ${file.name}", Toast.LENGTH_SHORT).show()
+        val source = frameSource
+        if (source == null) {
+            Toast.makeText(this, "Nothing captured yet", Toast.LENGTH_SHORT).show()
+            return
+        }
+        source.post {
+            val taken = onScreen.taken ?: return@post
+            val file = FrameSaver(this).save(taken.frame, taken.result) {
+                catalog.labelFor(mode, entry, it)
+            }
+            toast("Saved ${file.name}")
+        }
     }
 
     override fun onDestroy() {
