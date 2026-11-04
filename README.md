@@ -17,13 +17,14 @@ it runs them in your hand with no round trip and no connection.
 
 ## Demo
 
-<video src="https://github.com/atikulmunna/localvision/raw/main/docs/media/localvision-demo.mp4" controls muted playsinline></video>
+https://github.com/user-attachments/assets/e741aa37-c07c-47dc-9188-8ca0aaba6ca5
 
 Eleven seconds: choosing a QPDS slab, then live two-stage detection with the
 running tally of what was found and how many.
 
-If the player does not load, the clip is at
-[`docs/media/localvision-demo.mp4`](docs/media/localvision-demo.mp4).
+The same clip is committed at
+[`docs/media/localvision-demo.mp4`](docs/media/localvision-demo.mp4), so it
+survives if that attachment ever does not.
 
 ## What it does
 
