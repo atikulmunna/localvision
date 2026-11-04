@@ -105,30 +105,45 @@ different route to the segmentation mask.
 
 ## How it works
 
-```
-        camera frame (720x1280 YUV)
-                 |
-       YUV to upright RGB, 84 ms
-                 |
-        letterbox to 640 or 960
-                 |
-    +------------+------------+
-    |                         |
-  POSM                      QPDS
-  one stage                 two stage
-    |                         |
- YOLO26 detect          YOLO26 segment
- [1, 300, 6]            [1, 300, 38] + proto grid
-    |                         |
-    |                  masked crop per product
-    |                         |
-    |                  224 classifier, one per item
-    |                         |
-    +------------+------------+
-                 |
-         catalog labelling
-                 |
-          overlay and tally
+```mermaid
+flowchart TD
+    CAM["Camera frame<br/>720 x 1280 YUV"]
+    RGB["YUV to upright RGB<br/>84 ms, paid before any model runs"]
+    LB["Letterbox to 640 or 960<br/>scale to fit, centre, pad 114 grey"]
+    MODE{"Which mode?"}
+
+    subgraph posmStage ["POSM, one stage"]
+        DET["YOLO26 detect<br/>1 x 300 x 6, NMS free head"]
+    end
+
+    subgraph qpdsStage ["QPDS, two stages"]
+        SEG["YOLO26 segment<br/>1 x 300 x 38 plus proto grid"]
+        CROP["Masked crop per product<br/>the geometry the classifier was trained on"]
+        CLSF["Classifier at 224<br/>one inference per item, about 110 ms each"]
+        SEG --> CROP --> CLSF
+    end
+
+    LBL["Catalog labelling<br/>restricted to the chosen category or slab"]
+    OUT["Overlay: boxes, labels, running tally"]
+
+    CAM --> RGB --> LB --> MODE
+    MODE -->|POSM| DET
+    MODE -->|QPDS| SEG
+    DET --> LBL
+    CLSF --> LBL
+    LBL --> OUT
+
+    classDef source fill:#eef2ff,stroke:#6366f1,stroke-width:1.5px,color:#1e1b4b
+    classDef prep fill:#f1f5f9,stroke:#64748b,stroke-width:1.5px,color:#0f172a
+    classDef posmNode fill:#ecfdf5,stroke:#10b981,stroke-width:1.5px,color:#064e3b
+    classDef qpdsNode fill:#eff6ff,stroke:#3b82f6,stroke-width:1.5px,color:#1e3a8a
+    classDef sink fill:#fff7ed,stroke:#f97316,stroke-width:1.5px,color:#7c2d12
+
+    class CAM source
+    class RGB,LB,MODE prep
+    class DET posmNode
+    class SEG,CROP,CLSF qpdsNode
+    class LBL,OUT sink
 ```
 
 Four places where the detail matters:
