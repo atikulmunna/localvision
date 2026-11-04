@@ -17,7 +17,7 @@ it runs them in your hand with no round trip and no connection.
 
 ## Demo
 
-https://github.com/user-attachments/assets/e741aa37-c07c-47dc-9188-8ca0aaba6ca5
+https://github.com/user-attachments/assets/a0d02c05-7698-4777-bf82-a8b0d0e64801
 
 Eleven seconds: choosing a QPDS slab, then live two-stage detection with the
 running tally of what was found and how many.
