@@ -84,6 +84,29 @@ this is arithmetic order and the delegate, not preprocessing.
 Zero detections on `posm_fixture.jpg` under QPDS is correct. It is a POSM
 poster photographed against a door, with no DOVE or LUX products in it.
 
+### The POSM fixture was altered after these numbers were taken
+
+On 2026-11-04, before this repository was made public, the shopkeeper's face
+in `posm_fixture.jpg` was blurred. They are an identifiable person who did not
+agree to appear in a public repository, and the app's own position is that
+these are photographs of someone's shop.
+
+The change covers 9797 pixels inside x 1481 to 1599, y 457 to 591, clear of
+the buntings above them, which end at y 448. The file was re-encoded at
+quality 95 in the process, so every pixel moved a little.
+
+The reference was re-run on both versions to measure what that cost:
+
+| | class | score | box left, top |
+|---|---|---|---|
+| before | 13 | 0.489 | 86.13, 246.48 |
+| after | 13 | 0.522 | 85.92, 246.49 |
+
+Same single detection, same class, box moved 0.2 px, which is well inside the
+20 px tolerance `PosmPipelineTest` allows. The score rose with the better JPEG
+quality. The app-side figures in the tables above were measured on the
+original file and have not been re-run on the device since.
+
 ## What the mask misplacement actually cost here
 
 A review found that the app placed each instance's mask by stretching its
