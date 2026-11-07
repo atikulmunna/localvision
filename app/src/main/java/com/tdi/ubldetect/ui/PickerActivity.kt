@@ -1,6 +1,5 @@
 package com.tdi.ubldetect.ui
 
-import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
@@ -12,6 +11,8 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import com.tdi.ubldetect.R
 import com.tdi.ubldetect.UblApp
 import com.tdi.ubldetect.catalog.Catalog
@@ -32,10 +33,25 @@ import com.tdi.ubldetect.catalog.Mode
  * and work that out for themselves, each row carries its [EntryState]: ready,
  * partial, or unusable and not tappable.
  */
-class PickerActivity : Activity() {
+class PickerActivity : ComponentActivity() {
 
     private lateinit var catalog: Catalog
     private lateinit var container: LinearLayout
+
+    /**
+     * Back from the list of slabs goes to the list of modes.
+     *
+     * Both lists are the same activity with its contents swapped, so without
+     * this the system back gesture finished the activity and left the app
+     * altogether. The row at the top of the list always did the right thing,
+     * which is exactly why the gesture being wrong was easy to miss.
+     *
+     * Enabled only while the entries are showing, so back from the mode list
+     * still leaves, which is what it should do.
+     */
+    private val backToModes = object : OnBackPressedCallback(false) {
+        override fun handleOnBackPressed() = showModes()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,12 +70,14 @@ class PickerActivity : Activity() {
         setContentView(scroll)
         scroll.padForSystemBars()
 
+        onBackPressedDispatcher.addCallback(this, backToModes)
         showModes()
     }
 
     private fun color(id: Int) = resources.getColor(id, theme)
 
     private fun showModes() {
+        backToModes.isEnabled = false
         container.removeAllViews()
         container.addView(title("localVision"))
         container.addView(subtitle("What are you pointing at?"))
@@ -85,6 +103,7 @@ class PickerActivity : Activity() {
         // what CameraActivity starts from.
         val defaults = ControlsState()
         (application as UblApp).warmUp(defaults.assetsFor(mode), defaults.delegate)
+        backToModes.isEnabled = true
         container.removeAllViews()
         container.addView(title(if (mode == Mode.POSM) "Category" else "Slab"))
         container.addView(backRow { showModes() })
