@@ -104,16 +104,23 @@ class CatalogTest {
         assertEquals(22, c.entries(Mode.QPDS).size)
         assertEquals(8, c.entries(Mode.POSM).size)
 
-        // Two entries are genuinely unlabelable, and both are real: the
-        // deployed models have no class for their materials. WINTER_QPDS
-        // arrived with the Nov'26 standards ahead of its Vaseline models, and
-        // mini_meals wants a Knorr sticker the POSM model cannot detect. These
-        // are the picker's refusal path, not a generation bug.
+        // Every slab can label something now. WINTER_QPDS could not when it
+        // arrived with the Nov'26 standards, because the Vaseline classes it
+        // wants had not been trained yet; the 59 class QPDS-cls of 2026-11-06
+        // added all three. The picker's refusal path is still exercised by
+        // mini_meals, which wants a Knorr sticker POSM cannot detect.
         assertEquals(
-            listOf("WINTER_QPDS"),
+            emptyList<String>(),
             c.entries(Mode.QPDS).filter { it.isEmpty }.map { it.key },
         )
         assertTrue(c.entries(Mode.POSM).first { it.key == "mini_meals" }.isEmpty)
+
+        // The three classes that made the difference, at the indices the
+        // classifier gives them. They were appended rather than inserted, so
+        // no existing slab's class ids moved.
+        val winter = c.entries(Mode.QPDS).first { it.key == "WINTER_QPDS" }
+        assertEquals(setOf(56, 57, 58), winter.classIds)
+        assertEquals("Vaseline Body Lotion Cocoa Glow", c.labelFor(Mode.QPDS, winter, 56))
 
         // Every model class has a name, so nothing on screen can read
         // "class 54" while the model knows it is a Tresemme hair mask.

@@ -33,12 +33,12 @@ Pick **POSM** or **QPDS**, then a category or a slab, then point the camera.
 - **POSM** is point of sale material: posters, danglers, stickers, the things a
   brand puts up around a shop. One stage, one model, 48 classes.
 - **QPDS** is the products themselves on a planogram slab. Two stages: segment
-  the products, then classify each one against the 56 SKUs the classifier
+  the products, then classify each one against the 59 SKUs the classifier
   knows.
 
 Choosing matters. It restricts labelling to the classes that entry expects,
 which is both faster to read and more accurate, since a classifier choosing
-among a slab's own SKUs makes fewer mistakes than one choosing among all 56.
+among a slab's own SKUs makes fewer mistakes than one choosing among all 59.
 
 The picker shows what each entry can actually do, from the catalog's
 reconciliation against the shipped model:

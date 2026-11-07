@@ -660,14 +660,17 @@
     {
       "key": "WINTER_QPDS",
       "subtitle": "Skin Care",
-      "class_ids": [],
-      "display": {},
-      "missing_from_model": [
-        "vaseline_cocoa_glow_lotion_100",
-        "vaseline_cocoa_glow_lotion_200",
-        "vaseline_flawless_glow_serum",
-        "vaseline_gluta_hya_serum"
+      "class_ids": [
+        56,
+        57,
+        58
       ],
+      "display": {
+        "56": "Vaseline Body Lotion Cocoa Glow",
+        "57": "Vaseline Gluta-Hya Flawless Glow Serum 200ml",
+        "58": "Vaseline Gluta-Hya Dewy Radiance Serum 200ml"
+      },
+      "missing_from_model": [],
       "unmapped_model_classes": [
         "clear_cac",
         "clear_csm_large",
@@ -776,7 +779,7 @@
     },
     {
       "key": "nutrition",
-      "subtitle": "27 materials",
+      "subtitle": "30 materials",
       "class_ids": [
         0,
         5,
@@ -793,8 +796,8 @@
         "5": "HORLICKS 10TK SACHET HANGER",
         "6": "HORLICKS",
         "7": "HORLICKS 10TK SUNSHADE BANNER",
-        "8": "HORLICKS BUNTING OCT26",
-        "9": "HORLICKS PRICE BOARD OCT26",
+        "8": "HORLICKS BUNTING",
+        "9": "HORLICKS PRICE BOARD",
         "10": "HORLICKS",
         "11": "HORLICKS SHOPFIN AUG26",
         "12": "HORLICKS"
@@ -809,7 +812,7 @@
     },
     {
       "key": "oral_care",
-      "subtitle": "14 materials",
+      "subtitle": "16 materials",
       "class_ids": [
         21,
         22,
@@ -826,7 +829,7 @@
         "22": "ORAL CARE TOOTHPASTE SHELF TALKER OCT26",
         "23": "ORAL CARE TOOTHPASTE SHELF TALKER OCT26",
         "24": "ORAL CARE TOOTHPASTE SHELF TALKER OCT26",
-        "25": "PEPSODENT GUM EXPERT POSTER OCT26",
+        "25": "PEPSODENT GUM EXPERT POSTER",
         "26": "PEPSODENT RELAUNCH LARGE HANGER",
         "27": "PEPSODENT RELAUNCH POSTER",
         "28": "PEPSODENT RELAUNCH SMALL HANGER",
@@ -834,6 +837,7 @@
       },
       "missing_from_model": [
         "closeup_lemon_salt_poster_jun26",
+        "closeup_sticker",
         "da_toothpaste_st_bottom",
         "da_toothpaste_st_left",
         "da_toothpaste_st_right",
@@ -1027,7 +1031,10 @@
       "52": "tresemme_ks_small",
       "53": "tresemme_ks_white",
       "54": "tresemme_mask_25",
-      "55": "tresemme_serum_25"
+      "55": "tresemme_serum_25",
+      "56": "vaseline_cocoa_glow_lotion_100",
+      "57": "vaseline_flawless_glow_serum",
+      "58": "vaseline_gluta_hya_serum"
     }
   }
 }

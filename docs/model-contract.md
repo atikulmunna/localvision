@@ -185,7 +185,14 @@ over the whole grid**, which is the separation the crop builder depends on.
 
 ## QPDS classification
 
-`qpds_cls_224.tflite`. Source `QPDS-cls.pt`, yolo26x-cls, 56 classes.
+`qpds_cls_224.tflite`. Source `QPDS-cls.pt`, yolo26x-cls, 59 classes.
+Re-exported 2026-11-07 from the checkpoint of 2026-11-06, which appended
+`vaseline_cocoa_glow_lotion_100`, `vaseline_flawless_glow_serum` and
+`vaseline_gluta_hya_serum` at 56, 57 and 58. Appended rather than
+inserted, so no existing class id moved and every slab's ids still mean
+what the previous catalog said they meant. Those three are what makes
+`WINTER_QPDS` usable, having shipped in the standards ahead of a model
+that could detect them.
 
 | Property | Value |
 |---|---|
