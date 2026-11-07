@@ -87,15 +87,24 @@ class CameraTeardownTest {
      * loading thread had not filled in yet. Measured at the time: four
      * interpreters left open after one cycle.
      *
-     * The assertion is non-growth rather than zero, because models are now
+     * The assertion is a ceiling rather than zero, because models are now
      * deliberately kept between screens: the pool holds the working set so
      * the next category does not reload it. A leak shows up as a count that
-     * climbs with every cycle; the working set does not.
+     * climbs with every cycle, which five cycles would put well past
+     * [WORKING_SET_MAX]; the working set does not move.
+     *
+     * It is a ceiling rather than an equality for a second reason. Releasing
+     * now happens on the loading thread instead of on the main thread, so
+     * whether a given cycle's release lands before or after the next one
+     * starts is a race, and the count legitimately reads 0 or 1 depending on
+     * which won. Measured over repeated runs it was [1, 0, 0] one time and
+     * [0, 1, 1] the next, both of them correct. Asserting equality between
+     * two cycles was asserting the outcome of that race.
      */
     @Test
     fun leavingDuringAResolutionSwapDoesNotStrandInterpreters() {
         val counts = mutableListOf<Int>()
-        repeat(3) {
+        repeat(5) {
             ActivityScenario.launch<CameraActivity>(
                 cameraIntent(Mode.POSM, "hair_care"),
             ).use { scenario ->
@@ -120,7 +129,6 @@ class CameraTeardownTest {
             "interpreters grew across cycles: $counts",
             counts.all { it <= WORKING_SET_MAX },
         )
-        assertEquals("interpreters grew across cycles: $counts", counts[0], counts[2])
     }
 
     /** The controls are built in code with no ids, so the label is the handle. */

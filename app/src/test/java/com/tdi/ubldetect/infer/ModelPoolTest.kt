@@ -1,5 +1,9 @@
 package com.tdi.ubldetect.infer
 
+import java.util.Collections
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertSame
@@ -28,14 +32,30 @@ class ModelPoolTest {
         }
     }
 
+    /**
+     * The lists are synchronized because the pool opens models in parallel,
+     * so two `open` lambdas genuinely run on two threads here.
+     */
     private class Harness {
-        val opened = mutableListOf<Fake>()
-        val events = mutableListOf<String>()
+        val opened: MutableList<Fake> = Collections.synchronizedList(mutableListOf())
+        val events: MutableList<String> = Collections.synchronizedList(mutableListOf())
         var failOn: String? = null
+
+        /** Makes a named asset take this long to open. */
+        val slowOpens = mutableMapOf<String, Long>()
+
+        /** Counted down by the first open to start, for the locking tests. */
+        val openStarted = CountDownLatch(1)
+
+        /** Holds every open until a test releases it, likewise. */
+        var block: CountDownLatch? = null
 
         val pool = ModelPool<Fake> { asset, delegate ->
             if (asset == failOn) throw ModelAssetMissing(asset)
             events += "open $asset"
+            openStarted.countDown()
+            block?.await(5, TimeUnit.SECONDS)
+            slowOpens[asset]?.let { Thread.sleep(it) }
             Fake(asset, delegate).also { opened += it }
         }
 
@@ -217,5 +237,100 @@ class ModelPoolTest {
         h.failOn = "posm_960"
         h.pool.warm(listOf("posm_960"), gpu)
         assertEquals(0, h.live)
+    }
+
+    @Test
+    fun takingAHoldDoesNotWaitForARunningLoad() {
+        // The regression this was written for: beginUse took the pool's
+        // lock, a warm up holds that lock for its whole duration, and
+        // beginUse is called from onCreate on the main thread. Tapping a
+        // slab while QPDS was still warming measured the camera screen at
+        // 4121 ms to appear, and what the person saw was a frozen picker.
+        val h = Harness()
+        h.block = CountDownLatch(1)
+        val warming = thread { h.pool.warm(listOf("qpds_seg_640"), gpu) }
+        assertTrue("the load never started", h.openStarted.await(5, TimeUnit.SECONDS))
+
+        val began = System.nanoTime()
+        h.pool.beginUse()
+        h.pool.endUse()
+        val waitedMs = (System.nanoTime() - began) / 1_000_000
+
+        h.block!!.countDown()
+        warming.join()
+        assertTrue("beginUse waited ${waitedMs}ms for the load", waitedMs < 200)
+    }
+
+    @Test
+    fun readingProgressDoesNotWaitForARunningLoadEither() {
+        // Same lock, and the caller here is the view drawing the spinner
+        // about this very load.
+        val h = Harness()
+        h.block = CountDownLatch(1)
+        val warming = thread { h.pool.warm(listOf("qpds_seg_640", "qpds_cls_224"), gpu) }
+        assertTrue(h.openStarted.await(5, TimeUnit.SECONDS))
+
+        val began = System.nanoTime()
+        val seen = h.pool.loadProgress
+        val waitedMs = (System.nanoTime() - began) / 1_000_000
+
+        h.block!!.countDown()
+        warming.join()
+        assertTrue("loadProgress waited ${waitedMs}ms", waitedMs < 200)
+        assertEquals(2, seen.total)
+        assertTrue("a load in flight is a load being waited for", seen.waiting)
+    }
+
+    @Test
+    fun theTwoQpdsModelsOpenAtTheSameTime() {
+        // Sequentially these cost their sum, which on the device is 3.8 s
+        // plus 1.4 s. Overlapped the pair costs about what the segmenter
+        // costs alone.
+        val h = Harness()
+        h.slowOpens["qpds_seg_640"] = 400
+        h.slowOpens["qpds_cls_224"] = 400
+
+        val began = System.nanoTime()
+        h.pool.warm(listOf("qpds_seg_640", "qpds_cls_224"), gpu)
+        val tookMs = (System.nanoTime() - began) / 1_000_000
+
+        assertEquals(2, h.live)
+        assertTrue("two 400ms loads took ${tookMs}ms, so they were sequential", tookMs < 700)
+    }
+
+    @Test
+    fun orderSurvivesTheSecondModelFinishingFirst() {
+        // QPDS indexes positionally, and parallel loads finish in whatever
+        // order they finish. The slow one is asked for first on purpose.
+        val h = Harness()
+        h.slowOpens["qpds_seg_640"] = 300
+        val got = h.pool.acquire(listOf("qpds_seg_640", "qpds_cls_224"), gpu)
+        assertEquals("qpds_seg_640", got[0].asset)
+        assertEquals("qpds_cls_224", got[1].asset)
+    }
+
+    @Test
+    fun progressCountsOnlyWhatActuallyHadToOpen() {
+        val h = Harness()
+        h.pool.warm(listOf("qpds_seg_640", "qpds_cls_224"), gpu)
+        assertEquals(LoadProgress(2, 2), h.pool.loadProgress)
+        assertFalse(h.pool.loadProgress.waiting)
+
+        // Asking again opens nothing, so there is nothing to wait for and
+        // the card must not appear.
+        h.pool.acquire(listOf("qpds_seg_640", "qpds_cls_224"), gpu)
+        assertEquals(LoadProgress(0, 0), h.pool.loadProgress)
+        assertFalse(h.pool.loadProgress.waiting)
+    }
+
+    @Test
+    fun oneModelFailingStillHoldsTheOneThatOpened() {
+        // Parallel opens mean the good one is already built by the time the
+        // bad one throws. Dropping it on the floor would leak it.
+        val h = Harness()
+        h.failOn = "qpds_cls_224"
+        h.pool.warm(listOf("qpds_seg_640", "qpds_cls_224"), gpu)
+        assertEquals(1, h.live)
+        assertEquals("qpds_seg_640", h.opened.single().asset)
     }
 }

@@ -36,7 +36,21 @@ class UblApp : Application() {
     private val handler = Handler(Looper.getMainLooper())
 
     private val releaseWhenIdle = Runnable {
-        if (models.releaseIfIdle()) Log.i(TAG, "released models after idle grace")
+        release("after idle grace")
+    }
+
+    /**
+     * Closes the models, off the main thread.
+     *
+     * Every trigger for this arrives on the main thread (a timer, an activity
+     * stopping, a memory warning) and releasing takes the pool's lock, which
+     * a load holds for seconds. Doing it here would freeze the screen that is
+     * being left, so it is handed to the thread that does the loading.
+     */
+    private fun release(why: String) {
+        warmUpThread.execute {
+            if (models.releaseIfIdle()) Log.i(TAG, "released models $why")
+        }
     }
 
     val models = ModelPool<TfliteRunner> { asset, delegate ->
@@ -108,7 +122,7 @@ class UblApp : Application() {
                 // and the camera passes through here with the next screen
                 // already started, so this is the app being put away rather
                 // than a screen change.
-                if (models.releaseIfIdle()) Log.i(TAG, "released models, app not visible")
+                release("app not visible")
             }
 
             override fun onActivityCreated(activity: Activity, state: Bundle?) = Unit
@@ -122,7 +136,7 @@ class UblApp : Application() {
     /** Still delivered, and still worth acting on. */
     override fun onLowMemory() {
         super.onLowMemory()
-        if (models.releaseIfIdle()) Log.i(TAG, "released models under memory pressure")
+        release("under memory pressure")
     }
 
     private companion object {

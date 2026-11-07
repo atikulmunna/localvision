@@ -58,7 +58,6 @@ class OverlayTallyRenderTest {
             View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.EXACTLY),
         )
         view.layout(0, 0, w, h)
-        view.loadingMessage = null
         if (frozen) view.freeze()
         view.submit(
             FrameResult(
@@ -140,7 +139,6 @@ class OverlayTallyRenderTest {
             View.MeasureSpec.makeMeasureSpec(2340, View.MeasureSpec.EXACTLY),
         )
         view.layout(0, 0, 1080, 2340)
-        view.loadingMessage = null
         val labeller: (Int) -> String = { names[it] ?: "class $it" }
         val result = FrameResult(
             List(3) { detection(11, it) },

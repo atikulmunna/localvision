@@ -49,13 +49,6 @@ class OverlayView @JvmOverloads constructor(
     private var tallyWidth = 0f
 
     /**
-     * Shown instead of the timings until the models are ready.
-     *
-     * The camera binds in about 125 ms but a cold model load takes seconds,
-     * so without this the person watches a live preview draw no boxes and
-     * reasonably concludes the detector is broken.
-     */
-    /**
      * Whether to draw the boxes and their labels.
      *
      * The tally is deliberately not affected. With boxes off the preview is
@@ -63,12 +56,6 @@ class OverlayView @JvmOverloads constructor(
      * to turn them off in the first place.
      */
     var showBoxes: Boolean = true
-        set(value) {
-            field = value
-            invalidate()
-        }
-
-    var loadingMessage: String? = "Loading model"
         set(value) {
             field = value
             invalidate()
@@ -212,7 +199,9 @@ class OverlayView @JvmOverloads constructor(
         // y=0 and sits on top of the system clock, which is exactly the
         // overlap this app already had once.
         val top = paddingTop.toFloat()
-        val line = loadingMessage ?: status
+        // Loading has its own card now, drawn by LoadingView over the top of
+        // this one, so the pill is only ever the live timings.
+        val line = status
         if (line.isNotEmpty()) {
             // A pill rather than a full-width bar: it covers less of the
             // preview, which is the thing the person is actually looking at.

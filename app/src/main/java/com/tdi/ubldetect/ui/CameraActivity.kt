@@ -40,6 +40,7 @@ class CameraActivity : ComponentActivity() {
 
     private lateinit var previewView: PreviewView
     private lateinit var overlayView: OverlayView
+    private lateinit var loadingView: LoadingView
     private lateinit var controls: ControlsPanel
     private lateinit var entry: CatalogEntry
     private lateinit var catalog: Catalog
@@ -100,6 +101,15 @@ class CameraActivity : ComponentActivity() {
             scaleType = PreviewView.ScaleType.FILL_CENTER
         }
         overlayView = OverlayView(this)
+        loadingView = LoadingView(this).apply {
+            visibility = android.view.View.GONE
+            // Swallows taps rather than letting them reach the controls
+            // underneath. There is nothing useful to change until the models
+            // are open, and a resolution swap started mid load would queue a
+            // second load behind the first.
+            isClickable = true
+            progressSource = { models.loadProgress }
+        }
         controls = ControlsPanel(this, state, ::onControlsChanged, ::onSave).apply {
             layoutParams = FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -113,6 +123,8 @@ class CameraActivity : ComponentActivity() {
                 addView(previewView)
                 addView(overlayView)
                 addView(controls)
+                // Last, so the card and its scrim cover the controls too.
+                addView(loadingView)
             },
         )
         // The preview stays full bleed; only the chrome above it is inset.
@@ -162,9 +174,15 @@ class CameraActivity : ComponentActivity() {
             applySwap(next, previous)
             return
         }
+        // A resolution change reopens the model, which is the same seconds
+        // long wait as arriving here, so it gets the same card.
+        showLoading()
         // On the analysis thread, so the interpreter is never closed while a
         // frame is inside it. Doing this from here crashed natively.
-        source.post { applySwap(next, previous) }
+        source.post {
+            applySwap(next, previous)
+            runOnUiThread { loadingView.hide() }
+        }
     }
 
     private fun applySwap(next: ControlsState, previous: ControlsState) {
@@ -285,12 +303,26 @@ class CameraActivity : ComponentActivity() {
         frameSource = source
         source.start()
 
+        showLoading()
         source.post {
             val ok = buildPipeline(state)
             runOnUiThread {
-                if (ok) overlayView.loadingMessage = null else finish()
+                loadingView.hide()
+                if (!ok) finish()
             }
         }
+    }
+
+    /**
+     * Puts the spinner up, naming what is being waited for.
+     *
+     * Shown unconditionally rather than only when the pool is cold. Asking
+     * first would race: the warm-up may finish between the question and the
+     * answer, and the fade out handles the case where the models were
+     * already there, in about the time the fade in takes.
+     */
+    private fun showLoading() {
+        loadingView.show("${mode.name} Model")
     }
 
     /** Safe to call from the analysis thread as well as the UI thread. */

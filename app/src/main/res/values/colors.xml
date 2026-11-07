@@ -45,4 +45,14 @@
     <color name="chrome_text">#FFFFFFFF</color>
     <color name="chip">#33FFFFFF</color>
     <color name="chip_active">#FF00A37A</color>
+
+    <!--
+      The loading spinner, which sits directly on the preview with nothing
+      behind it. There is no panel to supply contrast, so the halo under the
+      arc and the track behind it are doing that job on their own, against a
+      preview that may be a white poster or a dark shelf.
+    -->
+    <color name="ring_track">#3D000000</color>
+    <color name="spinner_halo">#73000000</color>
+    <color name="chrome_text_dim">#D9FFFFFF</color>
 </resources>
