@@ -38,6 +38,7 @@
     <application
         android:name=".UblApp"
         android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
         android:label="localVision"
         android:supportsRtl="true"
         android:theme="@style/Theme.UblDetect">

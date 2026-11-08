@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The themed icon layer, for the Android 13 and later setting that recolours
+  every launcher icon from the wallpaper palette. This device has it on, so
+  for its owner this file *is* the icon and the green one is never seen.
+
+  The same drawing in one colour. The system tints it and reads only the
+  alpha, so the white here never reaches the screen. It is a separate file
+  rather than a reuse of the foreground because the two will diverge:
+  anything that leans on the green against the dark background has to be
+  solved another way when both are somebody's wallpaper.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <group>
+        <path
+            android:pathData="M32,47 V38 Q32,32 38,32 H47"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="6"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M61,32 H70 Q76,32 76,38 V47"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="6"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M76,61 V70 Q76,76 70,76 H61"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="6"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M47,76 H38 Q32,76 32,70 V61"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="6"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+    </group>
+
+    <group>
+        <path android:pathData="M50,45 V39" android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="4" android:strokeLineCap="round" />
+        <path android:pathData="M58,45 V39" android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="4" android:strokeLineCap="round" />
+        <path android:pathData="M50,63 V69" android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="4" android:strokeLineCap="round" />
+        <path android:pathData="M58,63 V69" android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="4" android:strokeLineCap="round" />
+        <path android:pathData="M45,50 H39" android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="4" android:strokeLineCap="round" />
+        <path android:pathData="M45,58 H39" android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="4" android:strokeLineCap="round" />
+        <path android:pathData="M63,50 H69" android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="4" android:strokeLineCap="round" />
+        <path android:pathData="M63,58 H69" android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="4" android:strokeLineCap="round" />
+    </group>
+
+    <path
+        android:pathData="M48,44 H60 Q64,44 64,48 V60 Q64,64 60,64 H48 Q44,64 44,60 V48 Q44,44 48,44 Z"
+        android:fillColor="#FFFFFFFF" />
+</vector>

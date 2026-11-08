@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Dark, because the accent only reads as the detection green against
+  something near black, and because the camera chrome is dark too.
+
+  A shape rather than a VectorDrawable with an inline aapt:attr gradient:
+  same result, a third of the lines.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <gradient android:angle="315" android:startColor="#FF10302A" android:endColor="#FF06120F" />
+</shape>

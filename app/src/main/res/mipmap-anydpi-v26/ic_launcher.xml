@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Adaptive only, with no rasterised copies in density buckets, because
+  `minSdk` is 29 and adaptive icons landed in 26.
+
+  The monochrome layer is not optional here. One UI renders it in place of
+  the colour icon and caches the result, and that cache is sticky: a stale
+  entry from before this app had any icon outlived a clean uninstall, a
+  versionCode bump and a reboot, showing a generated placeholder on every
+  surface of the phone. Good Lock refreshes it. Worth knowing before
+  concluding that a change to this file did nothing.
+-->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_launcher_background" />
+    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+    <monochrome android:drawable="@drawable/ic_launcher_monochrome" />
+</adaptive-icon>

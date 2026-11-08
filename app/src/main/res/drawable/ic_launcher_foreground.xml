@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  A viewfinder framing a processor: pointed at a shelf, decided on the phone.
+  Everything comparable sends the photograph to a server, so the icon says
+  "the work happens in here".
+
+  Everything sits inside the 66dp safe zone, a circle of radius 33 about the
+  centre, strokes included. The bracket corners come closest, at about 31.7
+  once their rounding and their 6dp stroke are counted, so no launcher mask
+  can clip them whatever shape it cuts.
+
+  Drawn at 108dp and rendered at roughly 48, so strokes are 4 to 6 units
+  wide and the chip is solid rather than outlined. An earlier version drew
+  it as a stroked square with a core inside, which at launcher size read as
+  concentric rings with no subject.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Viewfinder, four corners. -->
+    <group>
+        <path
+            android:pathData="M32,47 V38 Q32,32 38,32 H47"
+            android:strokeColor="#FF00E5A0"
+            android:strokeWidth="6"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M61,32 H70 Q76,32 76,38 V47"
+            android:strokeColor="#FF00E5A0"
+            android:strokeWidth="6"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M76,61 V70 Q76,76 70,76 H61"
+            android:strokeColor="#FF00E5A0"
+            android:strokeWidth="6"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M47,76 H38 Q32,76 32,70 V61"
+            android:strokeColor="#FF00E5A0"
+            android:strokeWidth="6"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+    </group>
+
+    <!-- The chip's legs, two a side. Three would silt up at launcher size. -->
+    <group>
+        <path android:pathData="M50,45 V39" android:strokeColor="#FF00E5A0"
+            android:strokeWidth="4" android:strokeLineCap="round" />
+        <path android:pathData="M58,45 V39" android:strokeColor="#FF00E5A0"
+            android:strokeWidth="4" android:strokeLineCap="round" />
+        <path android:pathData="M50,63 V69" android:strokeColor="#FF00E5A0"
+            android:strokeWidth="4" android:strokeLineCap="round" />
+        <path android:pathData="M58,63 V69" android:strokeColor="#FF00E5A0"
+            android:strokeWidth="4" android:strokeLineCap="round" />
+        <path android:pathData="M45,50 H39" android:strokeColor="#FF00E5A0"
+            android:strokeWidth="4" android:strokeLineCap="round" />
+        <path android:pathData="M45,58 H39" android:strokeColor="#FF00E5A0"
+            android:strokeWidth="4" android:strokeLineCap="round" />
+        <path android:pathData="M63,50 H69" android:strokeColor="#FF00E5A0"
+            android:strokeWidth="4" android:strokeLineCap="round" />
+        <path android:pathData="M63,58 H69" android:strokeColor="#FF00E5A0"
+            android:strokeWidth="4" android:strokeLineCap="round" />
+    </group>
+
+    <!-- The chip itself, solid, the one thing the eye lands on. -->
+    <path
+        android:pathData="M48,44 H60 Q64,44 64,48 V60 Q64,64 60,64 H48 Q44,64 44,60 V48 Q44,44 48,44 Z"
+        android:fillColor="#FF00E5A0" />
+</vector>
