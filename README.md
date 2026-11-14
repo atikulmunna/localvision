@@ -85,25 +85,25 @@ Nothing invented, nothing lost, no class flipped. Method and reasoning in
 ## Architecture
 
 ```mermaid
-flowchart TD
+flowchart LR
     CAM["Camera frame<br/>720 x 1280 YUV"]
-    RGB["YUV to upright RGB<br/>84 ms, paid before any model runs"]
-    LB["Letterbox to 640 or 960<br/>scale to fit, centre, pad 114 grey"]
-    MODE{"Which mode?"}
+    RGB["YUV to RGB<br/>84 ms"]
+    LB["Letterbox<br/>640 or 960"]
+    MODE{"Mode"}
 
     subgraph posmStage ["POSM, one stage"]
-        DET["YOLO26 detect<br/>1 x 300 x 6, NMS free head"]
+        DET["YOLO26 detect<br/>1 x 300 x 6, NMS free"]
     end
 
     subgraph qpdsStage ["QPDS, two stages"]
-        SEG["YOLO26 segment<br/>1 x 300 x 38 plus proto grid"]
-        CROP["Masked crop per product<br/>the geometry the classifier was trained on"]
-        CLSF["Classifier at 224<br/>one inference per item, about 110 ms each"]
+        SEG["YOLO26 segment<br/>1 x 300 x 38 plus proto"]
+        CROP["Masked crop<br/>per product"]
+        CLSF["Classifier 224<br/>110 ms each"]
         SEG --> CROP --> CLSF
     end
 
-    LBL["Catalog labelling<br/>restricted to the chosen category or slab"]
-    OUT["Overlay: boxes, labels, running tally"]
+    LBL["Catalog labelling<br/>chosen entry only"]
+    OUT["Overlay<br/>boxes and tally"]
 
     CAM --> RGB --> LB --> MODE
     MODE -->|POSM| DET
