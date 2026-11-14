@@ -188,12 +188,17 @@ preview stays smooth at its own rate and the boxes trail it.
 
 Two numbers worth knowing before you use it:
 
-**The camera appears in 125 ms; the first boxes take about 4.5 s.** That is GPU
-delegate initialisation, not the app hanging, and the status pill says so while
-it happens. The memory map itself costs 0 ms; interpreter construction costs
-3035 ms. CPU loads in 124 ms but each frame then costs nearly 4x more. Models
-are warmed while the picker is on screen, so most of that wait is already over
-by the time you tap.
+**The camera appears in about 150 ms; the first boxes take seconds.** That is
+GPU delegate initialisation, not the app hanging, and a spinner says so while
+it happens, counting the models as they open. The memory map itself costs
+0 ms; interpreter construction costs 3035 ms. CPU loads in 124 ms but each
+frame then costs nearly 4x more.
+
+Two things cut the wait you actually feel. The models are warmed while the
+picker is on screen, so the clock starts before you tap, and QPDS opens its
+two at once rather than in sequence, 5243 ms down to 4005 ms. The table above
+measures them one after the other, which is what the benchmark does and no
+longer what the app does.
 
 **QPDS costs about 110 ms per product.** Stage two runs one inference per
 detected item because the exported classifier takes a fixed batch of 1, so a 24
@@ -226,8 +231,8 @@ One: the Samsung Galaxy S23+ (SM-S916N), Snapdragon 8 Gen 2, Android 17.
 
 ## Building
 
-**The model files are not in this repository.** They are 57 MB each, produced
-by the export tooling rather than committed. Without them the app builds and
+**The model files are not in this repository.** They are 29 to 64 MB each,
+produced by the export tooling rather than committed. Without them the app builds and
 installs but finds nothing. See `tools/README.md`: export runs in WSL2, since
 Ultralytics LiteRT export is Linux and macOS only, and the results belong in
 `app/src/main/assets/models/`.
@@ -243,8 +248,8 @@ export JAVA_HOME="/c/Program Files/Android/Android Studio/jbr"
 ### Tests
 
 ```bash
-./gradlew :app:testDebugUnitTest          # 142 JVM tests
-./gradlew :app:connectedDebugAndroidTest  #  35 on the device
+./gradlew :app:testDebugUnitTest          # 148 JVM tests
+./gradlew :app:connectedDebugAndroidTest  #  39 on the device
 cd tools && python -m pytest tests/ -q    #  51 for the export and catalog tooling
 ```
 
@@ -262,7 +267,7 @@ app/            the app (Kotlin, CameraX, LiteRT)
   infer/        interpreter, detect and segment decoders, classifier, model pool
   pipeline/     POSM one stage, QPDS two stage
   catalog/      the generated class catalog
-  ui/           picker, camera, overlay, tally, controls
+  ui/           picker, camera, overlay, tally, loading, controls
 docs/           model contract, validation, benchmarks
 ```
 
