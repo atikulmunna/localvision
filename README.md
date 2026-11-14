@@ -22,10 +22,6 @@ https://github.com/user-attachments/assets/a0d02c05-7698-4777-bf82-a8b0d0e64801
 Eleven seconds: choosing a QPDS slab, then live two-stage detection with the
 running tally of what was found and how many.
 
-The same clip is committed at
-[`docs/media/localvision-demo.mp4`](docs/media/localvision-demo.mp4), so it
-survives if that attachment ever does not.
-
 ## What it does
 
 Pick **POSM** or **QPDS**, then a category or a slab, then point the camera.
